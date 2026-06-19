@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BaseDot — DOT PAD BASEBALL</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;1,700;1,800;1,900&family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=Oswald:wght@500;600;700&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue:#1763c8; --blue2:#0e4fa6; --red:#e23b41; --red2:#c1242d; --navy:#16245f;
+  --gold:#f4b41a; --pink:#e0196e; --green:#1f9d57;
+  --paper:#f6f3ec; --paper2:#ebe6db; --pline:#cdc6b6; --ink:#1b2433; --muted:#73798a;
+  --head:'Barlow Condensed',sans-serif; --bebas:'Bebas Neue',sans-serif;
+  --cond:'Oswald',sans-serif; --body:'Inter',system-ui,sans-serif; --stat:'Rajdhani',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--body);color:var(--ink);min-height:100vh;display:flex;flex-direction:column;
+  background:
+    linear-gradient(rgba(214,216,222,.82),rgba(198,201,209,.86)),
+    url('assets/bg_stadium_blur.jpg') center/cover fixed #cfc9ba}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+h1,h2,h3{font-weight:normal}
+.hd{font-family:var(--head);font-weight:800;font-style:italic;text-transform:uppercase}
+.num,.stat{font-family:var(--stat);font-weight:700;font-variant-numeric:tabular-nums}
+
+/* ---------- HEADER ---------- */
+.hdr{display:flex;align-items:center;gap:14px;padding:0 20px;height:60px;position:relative;z-index:6;
+  background:linear-gradient(180deg,#2277de,#1763c8);box-shadow:0 3px 14px rgba(0,0,0,.3)}
+.hdr .logo{height:26px}
+.hdr .scr{font-family:var(--head);font-weight:800;font-style:italic;color:#fff;font-size:20px;letter-spacing:.5px;text-transform:uppercase;
+  padding-left:14px;border-left:1px solid rgba(255,255,255,.25)}
+.counters{margin-left:auto;display:flex;align-items:center;gap:10px}
+.ctr{display:flex;align-items:center;background:rgba(255,255,255,.96);border-radius:20px;height:30px;padding:0 4px 0 4px;box-shadow:0 2px 5px rgba(0,0,0,.25)}
+.ctr img{width:24px;height:24px;border-radius:50%;object-fit:cover}
+.ctr .cv{font-family:var(--stat);font-weight:700;font-size:14px;color:var(--ink);padding:0 8px}
+.ctr .cp{width:22px;height:22px;border-radius:6px;background:var(--pink);color:#fff;font-size:15px;display:flex;align-items:center;justify-content:center;border:none;cursor:pointer}
+.hdr .start{font-family:var(--head);font-weight:800;font-style:italic;letter-spacing:.5px;background:linear-gradient(180deg,#ffd24d,var(--gold));color:#5a3d00;
+  border:2px solid #fff;border-radius:8px;padding:6px 16px;cursor:pointer;box-shadow:0 3px 0 #b88600;font-size:15px;text-transform:uppercase}
+
+/* ---------- CONTENT ---------- */
+.content{flex:1;padding:22px 26px 26px;overflow-y:auto}
+.view{display:none}.view.active{display:block;animation:pop .22s}
+@keyframes pop{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.row{display:grid;gap:18px}
+
+.tag{display:inline-block;font-family:var(--head);font-weight:800;font-style:italic;font-size:16px;letter-spacing:.5px;color:#fff;text-transform:uppercase;
+  background:var(--red);padding:5px 18px 5px 14px;transform:skewX(-9deg);box-shadow:3px 3px 0 rgba(0,0,0,.18);margin-bottom:14px}
+.tag span{display:inline-block;transform:skewX(9deg)}
+.tag.navy{background:var(--navy)} .tag.blue{background:var(--blue)}
+
+.card{background:var(--paper);border:2px dashed var(--red);border-radius:6px;box-shadow:0 6px 18px rgba(0,0,0,.22);position:relative;overflow:hidden}
+.card .ch{display:flex;align-items:center;justify-content:space-between;padding:11px 15px;background:var(--navy);color:#fff}
+.card .ch h3{font-family:var(--head);font-weight:800;font-style:italic;font-size:18px;letter-spacing:.5px;text-transform:uppercase}
+.card .ch a{font-family:var(--cond);font-size:11px;color:#9fd0ff;text-transform:uppercase;letter-spacing:1px;cursor:pointer}
+.card .ch.red{background:var(--red)} .card .ch.red a{color:#ffd9dc}
+.card .cb{padding:16px}
+
+/* ---------- VS HERO ---------- */
+.hero{position:relative;border-radius:8px;overflow:hidden;box-shadow:0 8px 26px rgba(0,0,0,.32);min-height:250px;
+  background:linear-gradient(105deg,var(--navy) 0%,var(--blue) 48%,var(--blue) 52%,var(--red2) 53%,var(--red) 100%);color:#fff}
+.hero .pcut{position:absolute;bottom:0;height:100%;z-index:1}
+.hero .pcut img{height:100%;object-fit:contain;object-position:bottom}
+.hero .pcut.l{left:0} .hero .pcut.r{right:0}
+.hero .pcut.l img{filter:drop-shadow(3px 0 0 rgba(255,255,255,.5))}
+.hero .inner{position:relative;z-index:2;text-align:center;padding:22px}
+.hero .tg{font-family:var(--cond);font-style:italic;letter-spacing:2px;font-size:12px;color:var(--gold);text-transform:uppercase}
+.hero .teams{display:flex;align-items:center;justify-content:center;gap:28px;margin:14px 0}
+.tbadge .lg{width:66px;height:66px;margin:0 auto 8px;display:flex;align-items:center;justify-content:center}
+.tbadge .lg img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 3px 6px rgba(0,0,0,.4))}
+.tbadge .nm{font-family:var(--head);font-weight:800;font-style:italic;letter-spacing:.5px;font-size:15px;text-transform:uppercase}
+.tbadge .rec{font-family:var(--cond);font-size:11px;opacity:.9}
+.vsbig{font-family:var(--bebas);font-size:46px;color:var(--gold);text-shadow:0 3px 0 rgba(0,0,0,.35)}
+.hero .meta{font-family:var(--cond);font-size:13px;opacity:.95}.hero .meta b{color:var(--gold)}
+.hero .play{margin-top:16px;font-family:var(--head);font-weight:800;font-style:italic;letter-spacing:.5px;background:linear-gradient(180deg,#ffd24d,var(--gold));
+  color:#5a3d00;border:2px solid #fff;border-radius:9px;padding:9px 22px;cursor:pointer;box-shadow:0 4px 0 #b88600;font-size:16px;text-transform:uppercase}
+
+.sbar{margin-bottom:13px}
+.sbar .t{display:flex;justify-content:space-between;font-family:var(--cond);font-size:12px;margin-bottom:5px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.sbar .t b{color:var(--ink);font-family:var(--stat);font-weight:700}
+.trk{height:10px;background:#dfd9cb;border-radius:6px;overflow:hidden;border:1px solid #cfc7b5}
+.trk i{display:block;height:100%;background:linear-gradient(90deg,var(--blue),#4f97ff)}
+.trk.r i{background:linear-gradient(90deg,var(--red),#ff5e64)}.trk.g i{background:linear-gradient(90deg,var(--green),#37c47e)}.trk.y i{background:linear-gradient(90deg,#f4b41a,#ffd566)}
+
+.prow{display:flex;align-items:center;gap:11px;padding:8px 0;border-bottom:1px solid var(--pline)}
+.prow:last-child{border:none}
+.prow .rk{font-family:var(--head);font-weight:800;font-style:italic;width:20px;text-align:center;color:var(--red);font-size:17px}
+.prow .av{width:36px;height:36px;border-radius:8px;overflow:hidden;flex-shrink:0;background:var(--navy)}
+.prow .av img{width:100%;height:100%;object-fit:cover;object-position:top}
+.prow .nm{flex:1}.prow .nm b{font-family:var(--head);font-weight:700;font-style:italic;text-transform:uppercase;letter-spacing:.3px}
+.prow .nm small{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.5px;font-family:var(--cond)}
+.rate{font-family:var(--stat);font-weight:700;font-size:16px;color:#fff;background:var(--green);border-radius:7px;padding:2px 10px}
+.rate.mid{background:var(--gold);color:#5a3d00}
+
+.wl{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:6px;font-family:var(--head);font-weight:800;font-style:italic;font-size:14px;color:#fff}
+.wl.w{background:var(--green)} .wl.l{background:var(--red)}
+
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{font-family:var(--cond);text-transform:uppercase;letter-spacing:1px;font-size:11px;color:var(--muted);text-align:left;padding:8px 6px;border-bottom:2px solid var(--pline)}
+td{padding:8px 6px;border-bottom:1px solid var(--pline)}tr:last-child td{border:none}
+.me{background:#fbeef0}.me td{font-weight:600}
+.team{display:flex;align-items:center;gap:9px;font-family:var(--head);font-weight:700;font-style:italic;text-transform:uppercase}
+.glyph{width:26px;height:26px;display:flex;align-items:center;justify-content:center}
+.glyph img{width:100%;height:100%;object-fit:contain}
+.glyph.pos{border-radius:6px;color:#fff;font-family:var(--head);font-weight:800;font-style:italic;font-size:10px}
+.mut{color:var(--muted)}
+
+/* ---------- PLAYER CARD (CSS fallback) ---------- */
+.pcard{position:relative;border-radius:10px;overflow:hidden;background:#fff;box-shadow:0 5px 14px rgba(0,0,0,.28);cursor:pointer}
+.pcard .top{height:46px;position:relative;background:linear-gradient(135deg,var(--navy),#2a5fc0);display:flex;align-items:center;justify-content:center}
+.pcard.alt .top{background:linear-gradient(135deg,var(--red2),var(--red))}
+.pcard .grade{position:absolute;top:0;left:0;font-family:var(--head);font-weight:800;font-style:italic;font-size:13px;color:#5a3d00;background:var(--gold);padding:1px 9px 1px 6px;clip-path:polygon(0 0,100% 0,80% 100%,0 100%)}
+.pcard .ov{position:absolute;top:4px;right:4px;font-family:var(--stat);font-weight:700;font-size:11px;color:#fff;background:rgba(0,0,0,.5);border-radius:5px;padding:0 5px}
+.pcard .ph{font-family:var(--head);font-weight:800;font-size:18px;color:rgba(255,255,255,.9)}
+.pcard .bot{padding:4px;text-align:center;background:#fff}
+.pcard .pn{font-family:var(--head);font-weight:700;font-style:italic;font-size:12px;text-transform:uppercase}
+.pcard .pp{font-family:var(--cond);font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+
+/* lineup field */
+.fieldwrap{display:grid;grid-template-columns:1.5fr .82fr;gap:18px}
+.field{position:relative;border-radius:10px;height:480px;overflow:hidden;box-shadow:0 8px 26px rgba(0,0,0,.32);
+  background:radial-gradient(circle at 50% 60%,#3c9a5d,#2c7344 60%,#235937)}
+.field::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 40px,rgba(255,255,255,.045) 40px 80px)}
+.field .dia{position:absolute;width:208px;height:208px;left:50%;top:57%;transform:translate(-50%,-50%) rotate(45deg);background:#c0894a;border:3px solid rgba(255,255,255,.55)}
+.pos{position:absolute;transform:translate(-50%,-50%);width:80px}
+.pos .cardimg{width:100%;display:block;border-radius:8px;box-shadow:0 5px 12px rgba(0,0,0,.45);cursor:pointer;transition:.15s}
+.pos .cardimg:hover{transform:translateY(-3px)}
+.ord .o{display:flex;align-items:center;gap:11px;padding:8px 6px;border-bottom:1px solid var(--pline)}
+.ord .o:last-child{border:none}
+.ord .o .n{font-family:var(--head);font-weight:800;font-style:italic;width:18px;text-align:center;color:var(--red)}
+.ord .o .pp{width:26px;font-family:var(--cond);font-size:11px;color:var(--muted);letter-spacing:1px}
+.ord .o .nn{flex:1;font-family:var(--head);font-weight:700;font-style:italic;text-transform:uppercase}
+.ord .o .ba{font-family:var(--stat);font-weight:700;color:var(--muted);font-size:12px}
+
+/* MATCH */
+.matchgrid{display:grid;grid-template-columns:1fr 1.05fr;gap:18px}
+.sim{background:#0c1730;border-radius:10px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.4);border:2px solid var(--navy)}
+.sim .sh{display:flex;justify-content:space-between;padding:10px 14px;background:linear-gradient(90deg,var(--navy),#1d3f8e);color:#fff;font-family:var(--cond);letter-spacing:1px;font-size:12px;text-transform:uppercase}
+.sim .sh .gold{color:var(--gold)}
+.sim canvas{display:block;width:100%;background:#0c2615}
+.board{background:linear-gradient(160deg,#13265f,#0c1a40);border-radius:10px;color:#fff;padding:18px;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.board .ls{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.board .ls .t{font-family:var(--head);font-weight:800;font-style:italic;font-size:20px}
+.board .ls .t.r{color:#ff7480}.board .ls .t.b{color:#7fb0ff}
+.board .ls .sc{font-family:var(--bebas);font-size:42px;letter-spacing:4px;color:var(--gold);text-shadow:0 3px 0 rgba(0,0,0,.35)}
+.cnt{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+.cnt div{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:11px 6px;text-align:center}
+.cnt b{font-family:var(--bebas);font-size:19px;display:block;letter-spacing:1px}
+.cnt span{font-family:var(--cond);font-size:10px;letter-spacing:1px;color:#9fb4e0;text-transform:uppercase}
+.bso{display:flex;gap:4px;justify-content:center;margin-top:6px}.bso i{width:10px;height:10px;border-radius:50%;border:1.5px solid #5d76b5}.bso i.on{background:var(--gold);border-color:var(--gold)}
+.decision{margin-top:16px;border-radius:10px;padding:18px;color:#fff;background:linear-gradient(135deg,var(--red2),var(--red));box-shadow:0 8px 20px rgba(224,59,65,.4)}
+.decision .q{font-family:var(--cond);font-size:15px;margin-bottom:14px;line-height:1.45}
+.opts{display:flex;gap:10px;flex-wrap:wrap}
+.opt{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.3);border-radius:9px;padding:10px 16px;cursor:pointer;font-family:var(--cond);font-weight:600}
+.opt.sel{background:#fff;color:var(--red2)}
+.opt small{display:block;font-size:11px;opacity:.85;font-weight:400;margin-top:2px}
+.hintline{font-family:var(--cond);font-size:11px;margin-top:14px;color:#ffd1d4;letter-spacing:.5px}.hintline b{color:var(--gold)}
+.matchup{display:flex;gap:14px;margin-top:14px}
+.mc{flex:1;background:var(--paper);border:2px dashed var(--red);border-radius:8px;padding:13px}
+.mc .role{font-family:var(--cond);font-size:10px;letter-spacing:1.5px;color:var(--red);text-transform:uppercase}
+.mc b{font-family:var(--head);font-weight:800;font-style:italic;font-size:16px;text-transform:uppercase}.mc .ln{font-family:var(--cond);font-size:11px;color:var(--muted);margin-top:5px;line-height:1.5}
+
+/* MODES */
+.modegrid{display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:16px}
+.mode{position:relative;border-radius:10px;overflow:hidden;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.3);aspect-ratio:1/1}
+.mode.big{grid-row:span 2;aspect-ratio:auto}
+.mode img{width:100%;height:100%;object-fit:cover;display:block}
+.mode .ml{position:absolute;left:14px;bottom:12px;font-family:var(--head);font-weight:800;font-style:italic;font-size:22px;color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.7);text-transform:uppercase}
+
+/* PROFILE */
+.profgrid{display:grid;grid-template-columns:1fr 1.1fr;gap:18px}
+.phead{display:flex;gap:14px;align-items:center;margin-bottom:16px}
+.phead .av{width:78px;height:78px;border-radius:12px;overflow:hidden;flex-shrink:0;background:var(--navy)}
+.phead .av img{width:100%;height:100%;object-fit:cover;object-position:top}
+.phead h2{font-family:var(--head);font-weight:800;font-style:italic;font-size:26px;letter-spacing:.5px;text-transform:uppercase}
+.phead .m{font-family:var(--cond);color:var(--muted);font-size:12px;margin-top:4px;text-transform:uppercase;letter-spacing:.5px}
+.tag2{display:inline-block;background:var(--paper2);border:1px solid var(--pline);border-radius:18px;padding:3px 12px;font-family:var(--cond);font-size:11px;margin:6px 5px 0 0;color:var(--navy)}
+.statbig{display:flex;gap:20px;flex-wrap:wrap}
+.statbig div b{font-family:var(--stat);font-weight:700;font-size:24px;color:var(--navy)}
+.statbig div span{display:block;font-family:var(--cond);font-size:10px;letter-spacing:1px;color:var(--muted);text-transform:uppercase}
+
+/* TRADE */
+.tradegrid{display:grid;grid-template-columns:1fr 78px 1fr;gap:16px;align-items:start}
+.tlist{display:flex;flex-direction:column;gap:8px}
+.titem{display:flex;align-items:center;gap:10px;background:#fff;border:2px solid var(--pline);border-radius:9px;padding:8px 11px;cursor:pointer}
+.titem.pick{border-color:var(--gold);background:#fffbe9}
+.titem .nn{flex:1;font-family:var(--head);font-weight:700;font-style:italic;font-size:13px;text-transform:uppercase}
+.scale{text-align:center;padding-top:54px;font-family:var(--head);font-weight:800;font-size:30px;color:var(--gold)}
+.scale .m{font-family:var(--cond);font-size:12px;color:var(--green);margin-top:8px;font-weight:600;text-transform:uppercase}
+.btn{font-family:var(--head);font-weight:800;font-style:italic;letter-spacing:.5px;border:2px solid #fff;border-radius:8px;padding:9px 18px;cursor:pointer;font-size:15px;text-transform:uppercase}
+.btn.gold{background:linear-gradient(180deg,#ffd24d,var(--gold));color:#5a3d00;box-shadow:0 3px 0 #b88600}
+.btn.ghost{background:var(--paper2);color:var(--navy);border-color:var(--pline);box-shadow:0 3px 0 #c2bba9}
+
+label.opt-row{display:flex;justify-content:space-between;align-items:center;font-family:var(--cond);font-weight:500}
+select{font-family:var(--body);border:1px solid var(--pline);border-radius:6px;padding:4px 8px;background:#fff}
+
+/* DOT PAD KEY STRIP */
+.keystrip{display:flex;align-items:stretch;background:linear-gradient(90deg,var(--navy),#1b3a82);border-top:3px solid var(--gold)}
+.keystrip .lead{display:flex;align-items:center;gap:7px;padding:0 16px;color:var(--gold);font-family:var(--head);font-weight:800;font-style:italic;font-size:13px;letter-spacing:.5px;text-transform:uppercase}
+.keystrip .kc{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:7px 4px;border-left:1px solid rgba(255,255,255,.1)}
+.keystrip .cap{font-family:var(--head);font-weight:800;font-size:12px;color:#fff;background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.28);border-radius:6px;padding:1px 9px;min-width:34px;text-align:center}
+.keystrip .d{font-family:var(--cond);font-size:9px;letter-spacing:1px;color:#a8bbe2;text-transform:uppercase;margin-top:3px}
+
+/* BOTTOM TAB BAR */
+.tabbar{display:flex;align-items:flex-end;justify-content:center;gap:10px;padding:12px 18px 16px;background:linear-gradient(180deg,#0c1f48,#091433)}
+.tab{flex:1;max-width:120px;text-align:center;cursor:pointer;border:2px dashed var(--red);border-radius:12px;padding:8px 4px 7px;background:rgba(255,255,255,.06)}
+.tab .em{width:36px;height:36px;border-radius:50%;margin:0 auto 4px;background:var(--blue);display:flex;align-items:center;justify-content:center;border:2px solid #fff;box-shadow:0 2px 5px rgba(0,0,0,.3)}
+.tab .em img{width:64%;height:64%;object-fit:contain;filter:brightness(0) invert(1)}
+.tab .nm{font-family:var(--head);font-weight:800;font-style:italic;font-size:12px;letter-spacing:.3px;color:#fff}
+.tab.active{background:rgba(255,255,255,.16);border-style:solid}
+.tab.active .em{background:var(--red)}
+.tab.center{max-width:130px;border:none;background:transparent;transform:translateY(-12px)}
+.tab.center .em{width:64px;height:56px;border-radius:0;clip-path:polygon(50% 0,100% 30%,85% 100%,15% 100%,0 30%);background:linear-gradient(180deg,#ff4a55,var(--red2));border:3px solid #fff;box-shadow:0 5px 12px rgba(0,0,0,.4)}
+.tab.center .em img{width:54%;height:54%}
+.tab.center .nm{color:#ffe08a;font-size:13px;margin-top:3px}
+
+@media(max-width:920px){.fieldwrap,.matchgrid,.profgrid,.tradegrid,.modegrid{grid-template-columns:1fr}.mode.big{grid-row:auto}}
+/* accessibility + device */
+.dpconnect{font-family:var(--cond);font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.5px;
+  background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.45);color:#fff;border-radius:20px;padding:6px 12px;cursor:pointer;display:flex;align-items:center;gap:7px}
+.dpconnect::before{content:"";width:9px;height:9px;border-radius:50%;background:#ff8b95}
+.dpconnect.ok::before{background:var(--green);box-shadow:0 0 8px var(--green)}
+#dpStatus{font-family:var(--cond);font-size:11px;color:#dfe9ff;min-width:10px}
+:focus-visible{outline:3px solid #ffd24d;outline-offset:2px}
+.skip{position:absolute;left:-999px;top:0;background:var(--gold);color:#000;padding:9px 15px;z-index:60;font-family:var(--cond);font-weight:700;border-radius:0 0 8px 0}
+.skip:focus{left:0;top:0}
+.prow .av.ini,.phead .av.ini{display:flex;align-items:center;justify-content:center;color:#fff;font-family:var(--head);font-style:italic}.prow .av.ini{font-size:16px}.phead .av.ini{font-size:30px}
+/* ---- Store / Packs (gacha) ---- */
+.store-head{display:flex;align-items:center;gap:14px;margin-bottom:14px;flex-wrap:wrap}
+.gembig{font-family:var(--stat);font-weight:700;font-size:17px;color:var(--navy);display:flex;align-items:center;gap:6px}
+.gembig .g{color:var(--pink)}
+.packgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.pack{position:relative;border-radius:12px;cursor:pointer;color:#fff;padding:18px;min-height:240px;display:flex;flex-direction:column;justify-content:flex-end;box-shadow:0 8px 22px rgba(0,0,0,.3);border:2px solid rgba(255,255,255,.25)}
+.pack.standard{background:linear-gradient(160deg,#7a6a52,#463c2c)}
+.pack.premium{background:linear-gradient(160deg,#2a5fc0,#142a5e)}
+.pack.elite{background:linear-gradient(160deg,#e23b41,#5e0a1a)}
+.pack:hover,.pack:focus-visible{transform:translateY(-4px)}
+.pack .pt{font-family:var(--head);font-style:italic;font-size:24px;letter-spacing:.5px;text-transform:uppercase}
+.pack .pc{font-family:var(--stat);font-weight:700;color:var(--gold);font-size:16px;margin:3px 0 8px;display:flex;align-items:center;gap:5px}
+.pack .odds{font-family:var(--cond);font-size:11px;line-height:1.6;color:rgba(255,255,255,.9);background:rgba(0,0,0,.28);border-radius:8px;padding:8px 10px}
+.pack .openbtn{margin-top:10px;font-family:var(--head);font-style:italic;text-transform:uppercase;background:var(--gold);color:#5a3d00;border:2px solid #fff;border-radius:9px;padding:8px;cursor:pointer;box-shadow:0 3px 0 #b88600;font-size:14px}
+.reveal{margin-top:18px;min-height:300px;display:flex;align-items:center;justify-content:center;border-radius:12px;background:#0c1730;position:relative;overflow:hidden;perspective:800px}
+.reveal .hint{color:var(--muted);font-family:var(--cond)}
+.flare{position:absolute;width:540px;height:540px;border-radius:50%;opacity:0;background:radial-gradient(rgba(255,255,255,.55),transparent 60%)}
+.reveal.show .flare{animation:flarein 1s ease}
+@keyframes flarein{0%{opacity:0;transform:scale(.3)}40%{opacity:1}100%{opacity:.18;transform:scale(1)}}
+.pullcard{position:relative;width:210px;border-radius:14px;overflow:hidden;background:#fff;box-shadow:0 12px 32px rgba(0,0,0,.55);transform:scale(.6) rotateY(90deg);opacity:0}
+.reveal.show .pullcard{animation:pullin .7s .2s ease forwards}
+@keyframes pullin{to{transform:scale(1) rotateY(0);opacity:1}}
+.pullcard .ptop{height:128px;display:flex;align-items:center;justify-content:center;font-family:var(--head);font-size:56px;color:rgba(255,255,255,.92);position:relative}
+.pullcard .pbadge{position:absolute;top:8px;left:8px;font-family:var(--head);font-style:italic;padding:2px 10px;border-radius:6px;font-size:13px}
+.pullcard .povr{position:absolute;top:8px;right:10px;font-family:var(--stat);font-weight:700;font-size:22px;color:#fff;text-shadow:0 1px 4px #000}
+.pullcard .pbot{padding:10px;text-align:center;background:#fff;color:var(--ink)}
+.pullcard .pnm{font-family:var(--head);font-style:italic;font-size:18px;text-transform:uppercase}
+.pullcard .ppos{font-family:var(--cond);color:var(--muted);font-size:12px;letter-spacing:1px}
+.rar-bronze{background:linear-gradient(160deg,#b08d57,#7a5c30)} .badge-bronze{background:#b08d57;color:#3a2a12}
+.rar-silver{background:linear-gradient(160deg,#c2cad6,#8b95a4)} .badge-silver{background:#c2cad6;color:#2a3340}
+.rar-gold{background:linear-gradient(160deg,#f4cd5a,#caa015)} .badge-gold{background:var(--gold);color:#5a3d00}
+.rar-elite{background:linear-gradient(160deg,#ff5470,#b3122f)} .badge-elite{background:#fff;color:var(--red2)}
+/* ---- Title / Splash ---- */
+#title{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#fff;padding:30px;background:linear-gradient(rgba(7,13,31,.5),rgba(7,13,31,.82)),url('assets/title_bg_web.jpg') center/cover;
+  background:radial-gradient(circle at 50% 32%,#1a3a78,#0c1a40 60%,#070d1f)}
+#title::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 35%,rgba(26,58,120,.35),transparent 60%);pointer-events:none}
+#title.hidden{display:none}
+#title>*{position:relative;z-index:1}
+#title .tl-mark{font-family:var(--bebas);font-size:clamp(64px,12vw,150px);letter-spacing:6px;line-height:.9;text-transform:uppercase;text-shadow:0 6px 0 rgba(0,0,0,.35)}
+#title .tl-mark .dot{color:var(--red)}
+#title .tl-sub{font-family:var(--head);font-weight:800;font-style:italic;letter-spacing:4px;color:var(--gold);font-size:clamp(13px,2.2vw,20px);margin-top:8px;text-transform:uppercase}
+#title .tl-tag{font-family:var(--head);font-weight:900;font-style:italic;font-size:clamp(22px,4vw,40px);text-transform:uppercase;margin-top:28px;line-height:1;text-shadow:0 3px 0 rgba(0,0,0,.4)}
+#title .tl-tag .hl{color:var(--red)}
+#title .playball{font-family:var(--bebas);letter-spacing:3px;font-size:clamp(26px,4vw,40px);text-transform:uppercase;background:linear-gradient(180deg,#ffd24d,var(--gold));color:#5a3d00;border:3px solid #fff;border-radius:14px;padding:10px 56px;margin-top:34px;cursor:pointer;box-shadow:0 6px 0 #b88600,0 10px 24px rgba(0,0,0,.45)}
+#title .playball:active{transform:translateY(3px);box-shadow:0 3px 0 #b88600}
+#title .tl-utils{display:flex;gap:32px;margin-top:42px}
+#title .util{display:flex;flex-direction:column;align-items:center;gap:7px;cursor:pointer;color:#cdd8f0;font-family:var(--head);font-weight:700;letter-spacing:1.5px;font-size:12px;text-transform:uppercase}
+#title .util .uc{width:46px;height:46px;border-radius:50%;border:2px solid rgba(255,255,255,.5);display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff}
+#title .util:hover,#title .util:focus-visible{color:#fff}
+#title .tl-dp{position:absolute;bottom:18px;font-family:var(--cond);font-size:11px;color:#8fa2c8;letter-spacing:1.5px;text-transform:uppercase}
+</style>
+</head>
+<body>
+<a href="#main" class="skip">Skip to content</a>
+<h1 class="sr-only">BaseDot — Accessible Dot Pad Baseball Manager</h1>
+<div id="live" class="sr-only" role="status" aria-live="assertive"></div>
+
+<!-- ===== HEADER ===== -->
+<section id="title" role="dialog" aria-label="BaseDot title screen">
+  <div class="tl-mark">BASE<span class="dot">DOT</span></div>
+  <div class="tl-sub">Virtual Baseball League</div>
+  <div class="tl-tag">Play Hard.<br><span class="hl">Hit Harder.</span></div>
+  <button class="playball" id="playBall" aria-label="Play Ball — enter the game">Play Ball</button>
+  <div class="tl-utils">
+    <div class="util" tabindex="0" role="button"><span class="uc">&#127760;</span>Language</div>
+    <div class="util" tabindex="0" role="button"><span class="uc">?</span>Support</div>
+    <div class="util" tabindex="0" role="button"><span class="uc">&#9881;</span>Service</div>
+  </div>
+  <div class="tl-dp">Dot Pad · Braille · Voice ready</div>
+</section>
+<header class="hdr">
+  <img class="logo" src="assets/logo_trans.png" alt="BaseDot">
+  <span class="scr" id="scrTitle">Dashboard</span>
+  <div class="counters">
+    <span class="ctr"><img src="assets/ico_stamina.png" alt="stamina"><span class="cv">8/10</span><button class="cp">+</button></span>
+    <span class="ctr"><img src="assets/ico_funds.png" alt="funds"><span class="cv">4.2M</span><button class="cp">+</button></span>
+    <span class="ctr"><img src="assets/ico_scout.png" alt="scout"><span class="cv">12</span><button class="cp">+</button></span>
+    <span class="ctr"><span class="ci" style="background:var(--pink)">◈</span><span class="cv" id="gemBal">320</span><button class="cp" onclick="buyGems(500)" aria-label="Buy gems">+</button></span>
+    <span id="dpStatus" role="status" aria-live="polite"></span>
+    <button id="dpConnect" class="dpconnect" aria-label="Connect Dot Pad device over Bluetooth">Connect Dot Pad</button>
+    <button class="start" onclick="go('packs')" aria-label="Open the player pack store" style="background:linear-gradient(180deg,#ff5fa2,var(--pink));color:#fff;box-shadow:0 3px 0 #9c0f4c">◈ Packs</button>
+    <button class="start" onclick="go('match')">▶ Play</button>
+  </div>
+</header>
+
+<div class="content" id="main" role="main" tabindex="-1">
+
+  <!-- ===== DASHBOARD ===== -->
+  <section class="view active" id="dashboard">
+    <div class="row" style="grid-template-columns:1.5fr 1fr">
+      <div class="row" style="align-content:start">
+        <div class="hero">
+          <div class="pcut l"><img src="assets/cut_home_star.png" alt=""></div>
+          <div class="pcut r"><img src="assets/cut_away_star.png" alt=""></div>
+          <div class="inner">
+            <div class="tg">Next Game · Today 7:30 PM · Capital Stadium</div>
+            <div class="teams">
+              <div class="tbadge"><div class="lg"><img src="assets/team_CW.png" alt="CW"></div><div class="nm">Capital Wings</div><div class="rec">42-31 · HOME</div></div>
+              <div class="vsbig">VS</div>
+              <div class="tbadge"><div class="lg"><img src="assets/team_HS.png" alt="HS"></div><div class="nm">Harbor Sharks</div><div class="rec">50-30 · 1ST</div></div>
+            </div>
+            <div class="meta">SP <b>J. DONOVAN</b> (ERA 2.98) &nbsp;—&nbsp; T. VARGAS (ERA 3.41)</div>
+            <button class="play" onclick="go('match')">⚾ Play on Dot Pad</button>
+          </div>
+        </div>
+        <div class="card"><div class="ch"><h3>Season Metrics</h3><a>View All</a></div><div class="cb">
+          <div class="sbar"><div class="t"><span>Team AVG</span><b>.271 · 3rd</b></div><div class="trk"><i style="width:71%"></i></div></div>
+          <div class="sbar"><div class="t"><span>Team ERA</span><b>3.62 · 5th</b></div><div class="trk r"><i style="width:58%"></i></div></div>
+          <div class="sbar"><div class="t"><span>AVG w/ RISP</span><b>.288</b></div><div class="trk g"><i style="width:64%"></i></div></div>
+          <div class="sbar"><div class="t"><span>Bullpen Stability</span><b>FAIR</b></div><div class="trk y"><i style="width:52%"></i></div></div>
+        </div></div>
+      </div>
+      <div class="row" style="align-content:start">
+        <div class="card"><div class="ch red"><h3>Top Performers</h3><a>View All</a></div><div class="cb">
+          <div class="prow"><span class="rk">1</span><span class="av"><img src="assets/avatar_Bell.png" alt=""></span><span class="nm"><b>M. Bell</b><small>LF · Left Field</small></span><span class="rate">8.4</span></div>
+          <div class="prow"><span class="rk">2</span><span class="av"><img src="assets/avatar_Donovan.png" alt=""></span><span class="nm"><b>J. Donovan</b><small>SP · Starter</small></span><span class="rate">8.1</span></div>
+          <div class="prow"><span class="rk">3</span><span class="av"><img src="assets/avatar_Sullivan.png" alt=""></span><span class="nm"><b>J. Sullivan</b><small>SS · Shortstop</small></span><span class="rate mid">7.5</span></div>
+          <div class="prow"><span class="rk">4</span><span class="av"><img src="assets/avatar_Foster.png" alt=""></span><span class="nm"><b>B. Foster</b><small>CL · Closer</small></span><span class="rate mid">7.3</span></div>
+        </div></div>
+        <div class="card"><div class="ch"><h3>Recent Form</h3><a onclick="go('schedule')">Schedule</a></div><div class="cb">
+          <div style="display:flex;gap:8px;margin-bottom:12px"><span class="wl w">W</span><span class="wl w">W</span><span class="wl l">L</span><span class="wl w">W</span><span class="wl l">L</span></div>
+          <div style="color:var(--muted);font-size:13px;font-family:var(--cond)">Last 5: 3W 2L · Latest <b style="color:var(--green)">vs BAY CITY 5-3 W</b></div>
+        </div></div>
+        <div class="card"><div class="ch"><h3>Division</h3><a onclick="go('standings')">View All</a></div><div class="cb"><table>
+          <tr><td>1</td><td><span class="team"><span class="glyph"><img src="assets/team_HS.png"></span>Harbor Sharks</span></td><td class="num mut" style="text-align:right">50-30</td></tr>
+          <tr class="me"><td>2</td><td><span class="team"><span class="glyph"><img src="assets/team_CW.png"></span>Capital Wings</span></td><td class="num" style="text-align:right">42-31</td></tr>
+          <tr><td>3</td><td><span class="team"><span class="glyph"><img src="assets/team_BC.png"></span>Bay City</span></td><td class="num mut" style="text-align:right">40-34</td></tr>
+        </table></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== MATCH ===== -->
+  <section class="view" id="match">
+    <div class="tag"><span>Live · In-Game</span></div>
+    <div class="matchgrid">
+      <div class="row" style="align-content:start">
+        <div class="sim">
+          <div class="sh"><span>Dot Pad Simulator — 60 × 40</span><span class="gold">Runners 1st · 3rd</span></div>
+          <canvas id="simcv" width="600" height="400"></canvas>
+        </div>
+        <div class="keystrip" style="border-radius:8px" id="simkeys2"></div>
+        <div class="matchup">
+          <div class="mc"><div class="role">Batter · CW</div><b>M. Bell #7</b><div class="ln">LF · L · .312 8HR · CON 85 POW 88</div></div>
+          <div class="mc"><div class="role">Pitcher · HS</div><b>T. Vargas #21</b><div class="ln">SP · R · ERA 3.41 · FATIGUE <b style="color:var(--red)">HIGH</b></div></div>
+        </div>
+      </div>
+      <div class="row" style="align-content:start">
+        <div class="board">
+          <div class="ls"><div class="t r">CW</div><div class="sc">3 : 2</div><div class="t b">HS</div></div>
+          <div class="cnt">
+            <div><b>BOT 5</b><span>Inning</span></div>
+            <div><b>2-1</b><span>B-S<div class="bso"><i class="on"></i><i class="on"></i><i></i></div></span></div>
+            <div><b>2</b><span>Out<div class="bso"><i class="on"></i><i class="on"></i><i></i></div></span></div>
+            <div><b>1·3</b><span>Runners</span></div>
+          </div>
+        </div>
+        <div class="decision">
+          <div class="q">⚠ DECISION POINT — Starter fatigue <b>HIGH</b>, runners in scoring position, 2 outs. Make a pitching change?</div>
+          <div class="opts">
+            <div class="opt sel">Bring Reliever<small>B. Foster (CL) · Stability 79</small></div>
+            <div class="opt">Stay<small>Keep T. Vargas</small></div>
+          </div>
+          <div class="hintline">DOT PAD &nbsp;<b>◀+F1</b> Pitching change · <b>◀▶</b> Move option · <b>F1</b> Confirm</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== MODES ===== -->
+  <section class="view" id="modes">
+    <div class="tag navy"><span>Game Modes</span></div>
+    <div class="modegrid">
+      <div class="mode big" onclick="go('match')"><img src="assets/mode_season_hero.png" alt=""><div class="ml">Season Mode</div></div>
+      <div class="mode" onclick="go('match')"><img src="assets/mode_thumb_0.png" alt=""></div>
+      <div class="mode" onclick="go('match')"><img src="assets/mode_thumb_1.png" alt=""></div>
+      <div class="mode" onclick="go('match')"><img src="assets/mode_thumb_2.png" alt=""></div>
+      <div class="mode" onclick="go('match')"><img src="assets/mode_thumb_3.png" alt=""></div>
+    </div>
+  </section>
+
+  <!-- ===== LINEUP ===== -->
+  <section class="view" id="lineup">
+    <div class="tag"><span>Line-Up</span></div>
+    <div class="fieldwrap">
+      <div class="field">
+        <div class="dia"></div>
+        <div class="pos" style="left:50%;top:90%" data-p="C" data-n="J. Russo" data-ov="74"></div>
+        <div class="pos" style="left:50%;top:55%" data-p="P" data-n="J. Donovan" data-ov="82" data-card="SPark"></div>
+        <div class="pos" style="left:80%;top:62%" data-p="1B" data-n="D. Cooper" data-ov="76" data-card="SOh"></div>
+        <div class="pos" style="left:68%;top:40%" data-p="2B" data-n="M. Hayes" data-ov="71" data-card="WJung"></div>
+        <div class="pos" style="left:32%;top:40%" data-p="SS" data-n="J. Sullivan" data-ov="79" data-card="DLee"></div>
+        <div class="pos" style="left:20%;top:62%" data-p="3B" data-n="R. Mitchell" data-ov="73"></div>
+        <div class="pos" style="left:18%;top:18%" data-p="LF" data-n="M. Bell" data-ov="85" data-card="MKim"></div>
+        <div class="pos" style="left:50%;top:10%" data-p="CF" data-n="T. Brooks" data-ov="77" data-card="JYoon"></div>
+        <div class="pos" style="left:82%;top:18%" data-p="RF" data-n="K. Parker" data-ov="72"></div>
+      </div>
+      <div class="card"><div class="ch red"><h3>Batting Order</h3><a>Auto</a></div><div class="cb"><div class="ord">
+        <div class="o"><span class="n">1</span><span class="pp">CF</span><span class="nn">T. Brooks</span><span class="ba">.301</span></div>
+        <div class="o"><span class="n">2</span><span class="pp">SS</span><span class="nn">J. Sullivan</span><span class="ba">.288</span></div>
+        <div class="o"><span class="n">3</span><span class="pp">LF</span><span class="nn">M. Bell</span><span class="ba">.312</span></div>
+        <div class="o"><span class="n">4</span><span class="pp">1B</span><span class="nn">D. Cooper</span><span class="ba">.279</span></div>
+        <div class="o"><span class="n">5</span><span class="pp">DH</span><span class="nn">C. Walker</span><span class="ba">.266</span></div>
+        <div class="o"><span class="n">6</span><span class="pp">3B</span><span class="nn">R. Mitchell</span><span class="ba">.251</span></div>
+        <div class="o"><span class="n">7</span><span class="pp">RF</span><span class="nn">K. Parker</span><span class="ba">.244</span></div>
+        <div class="o"><span class="n">8</span><span class="pp">C</span><span class="nn">J. Russo</span><span class="ba">.238</span></div>
+        <div class="o"><span class="n">9</span><span class="pp">2B</span><span class="nn">M. Hayes</span><span class="ba">.229</span></div>
+      </div></div></div>
+    </div>
+  </section>
+
+  <!-- ===== PITCHERS ===== -->
+  <section class="view" id="pitchers">
+    <div class="tag navy"><span>Pitchers</span></div>
+    <div class="row" style="grid-template-columns:1fr 1fr">
+      <div class="card"><div class="ch"><h3>Rotation</h3></div><div class="cb"><table>
+        <tr><th>Slot</th><th>Name</th><th>ERA</th><th>Fatigue</th></tr>
+        <tr><td>SP1</td><td>J. Donovan</td><td class="num">2.98</td><td><div class="trk y" style="width:90px"><i style="width:80%"></i></div></td></tr>
+        <tr><td>SP2</td><td>C. Bennett</td><td class="num">3.45</td><td><div class="trk g" style="width:90px"><i style="width:25%"></i></div></td></tr>
+        <tr><td>SP3</td><td>M. Reyes</td><td class="num">3.88</td><td><div class="trk g" style="width:90px"><i style="width:40%"></i></div></td></tr>
+        <tr><td>SP4</td><td>S. Whitaker</td><td class="num">4.21</td><td><div class="trk g" style="width:90px"><i style="width:15%"></i></div></td></tr>
+        <tr><td>SP5</td><td>D. Carter</td><td class="num">4.55</td><td><div class="trk g" style="width:90px"><i style="width:30%"></i></div></td></tr>
+      </table></div></div>
+      <div class="card"><div class="ch red"><h3>Bullpen</h3></div><div class="cb"><table>
+        <tr><th>Role</th><th>Name</th><th>ERA</th><th>Fatigue</th></tr>
+        <tr><td><b style="color:var(--red)">CL</b></td><td>B. Foster</td><td class="num">2.41</td><td><div class="trk g" style="width:90px"><i style="width:20%"></i></div></td></tr>
+        <tr><td><b style="color:#caa000">SU</b></td><td>A. Hill</td><td class="num">3.10</td><td><div class="trk y" style="width:90px"><i style="width:55%"></i></div></td></tr>
+        <tr><td>MID</td><td>L. Romero</td><td class="num">3.77</td><td><div class="trk g" style="width:90px"><i style="width:30%"></i></div></td></tr>
+        <tr><td>MID</td><td>P. Nolan</td><td class="num">4.02</td><td><div class="trk g" style="width:90px"><i style="width:10%"></i></div></td></tr>
+        <tr><td>LONG</td><td>G. Owens</td><td class="num">4.66</td><td><div class="trk g" style="width:90px"><i style="width:5%"></i></div></td></tr>
+      </table></div></div>
+    </div>
+  </section>
+
+  <!-- ===== PROFILE ===== -->
+  <section class="view" id="profile">
+    <div class="tag blue"><span>Player</span></div>
+    <div class="profgrid">
+      <div class="card"><div class="cb">
+        <div class="phead"><div class="av"><img src="assets/avatar_Bell.png" alt=""></div><div><h2>M. Bell</h2>
+          <div class="m">28 · LF · L/L · Capital Wings</div>
+          <div><span class="tag2">OVR 85 · #1 on team</span><span class="tag2">Contract ~S3</span></div></div></div>
+        <div class="sbar"><div class="t"><span>Current OVR</span><b>85</b></div><div class="trk g"><i style="width:85%"></i></div></div>
+        <div class="sbar"><div class="t"><span>Potential</span><b>88</b></div><div class="trk y"><i style="width:88%"></i></div></div>
+        <div style="margin:16px 0 0"><div class="tag navy" style="font-size:14px"><span>Season Stats</span></div></div>
+        <div class="statbig">
+          <div><b>.312</b><span>AVG</span></div><div><b>.401</b><span>OBP</span></div>
+          <div><b>8</b><span>HR</span></div><div><b>41</b><span>RBI</span></div><div><b>12</b><span>SB</span></div>
+        </div>
+      </div></div>
+      <div class="card"><div class="ch"><h3>Attributes</h3></div><div class="cb">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 22px">
+          <div class="sbar"><div class="t"><span>Contact</span><b>85</b></div><div class="trk g"><i style="width:85%"></i></div></div>
+          <div class="sbar"><div class="t"><span>Power</span><b>88</b></div><div class="trk g"><i style="width:88%"></i></div></div>
+          <div class="sbar"><div class="t"><span>Eye</span><b>80</b></div><div class="trk g"><i style="width:80%"></i></div></div>
+          <div class="sbar"><div class="t"><span>Speed</span><b>70</b></div><div class="trk y"><i style="width:70%"></i></div></div>
+          <div class="sbar"><div class="t"><span>Fielding</span><b>60</b></div><div class="trk y"><i style="width:60%"></i></div></div>
+          <div class="sbar"><div class="t"><span>Arm</span><b>62</b></div><div class="trk y"><i style="width:62%"></i></div></div>
+        </div>
+        <div style="text-align:center;margin-top:8px">
+          <svg viewBox="0 0 200 165" width="200">
+            <polygon points="100,24 168,63 168,121 100,150 32,121 32,63" fill="none" stroke="#cdc6b6" stroke-width="1.5"/>
+            <polygon points="100,57 152,86 152,118 100,140 50,118 50,94" fill="rgba(31,157,87,.22)" stroke="var(--green)" stroke-width="2"/>
+            <text x="100" y="16" fill="#73798a" font-size="10" text-anchor="middle">CON</text>
+            <text x="173" y="64" fill="#73798a" font-size="10">POW</text>
+            <text x="173" y="128" fill="#73798a" font-size="10">SPD</text>
+            <text x="100" y="163" fill="#73798a" font-size="10" text-anchor="middle">FLD</text>
+            <text x="6" y="128" fill="#73798a" font-size="10">ARM</text>
+            <text x="10" y="64" fill="#73798a" font-size="10">EYE</text>
+          </svg>
+        </div>
+      </div></div>
+    </div>
+  </section>
+
+  <!-- ===== TRADE ===== -->
+  <section class="view" id="trade">
+    <div class="tag"><span>Trade</span></div>
+    <div class="card"><div class="ch red"><h3>Trade with Harbor Sharks</h3><a>Change Team</a></div><div class="cb">
+      <div class="tradegrid">
+        <div><div style="font-family:var(--head);font-weight:800;font-style:italic;color:var(--red);margin-bottom:10px;text-transform:uppercase">Out — Capital Wings</div>
+          <div class="tlist">
+            <div class="titem pick"><span class="glyph pos" style="background:var(--navy)">3B</span><span class="nn">R. Mitchell</span><span class="rate mid">73</span></div>
+            <div class="titem"><span class="glyph pos" style="background:var(--navy)">SP</span><span class="nn">D. Carter</span><span class="rate" style="background:var(--muted)">68</span></div>
+            <div class="titem"><span class="glyph pos" style="background:var(--navy)">RF</span><span class="nn">K. Parker</span><span class="rate" style="background:var(--muted)">72</span></div>
+          </div></div>
+        <div class="scale">⇄<div class="m">Likely Accept</div></div>
+        <div><div style="font-family:var(--head);font-weight:800;font-style:italic;color:var(--blue);margin-bottom:10px;text-transform:uppercase">In — Harbor Sharks</div>
+          <div class="tlist">
+            <div class="titem pick"><span class="glyph pos" style="background:var(--blue)">3B</span><span class="nn">H. Bryant</span><span class="rate mid">75</span></div>
+            <div class="titem"><span class="glyph pos" style="background:var(--blue)">RP</span><span class="nn">M. Cross</span><span class="rate" style="background:var(--muted)">70</span></div>
+            <div class="titem"><span class="glyph pos" style="background:var(--blue)">C</span><span class="nn">A. Doyle</span><span class="rate" style="background:var(--muted)">69</span></div>
+          </div></div>
+      </div>
+      <div style="text-align:right;margin-top:18px"><button class="btn ghost">Reset</button> <button class="btn gold" onclick="alert('Confirm with F1')">Propose</button></div>
+    </div></div>
+  </section>
+
+  <!-- ===== STANDINGS ===== -->
+  <section class="view" id="standings">
+    <div class="tag navy"><span>Standings</span></div>
+    <div class="card"><div class="ch"><h3>East Division</h3></div><div class="cb"><table>
+      <tr><th>#</th><th>Team</th><th>W</th><th>L</th><th>PCT</th><th>GB</th><th>L10</th></tr>
+      <tr><td>1</td><td><span class="team"><span class="glyph"><img src="assets/team_HS.png"></span>Harbor Sharks</span></td><td class="num">50</td><td class="num">30</td><td class="num">.625</td><td class="mut">-</td><td class="num">7-3</td></tr>
+      <tr class="me"><td>2</td><td><span class="team"><span class="glyph"><img src="assets/team_CW.png"></span>Capital Wings</span></td><td class="num">42</td><td class="num">31</td><td class="num">.575</td><td class="num">4.5</td><td class="num">6-4</td></tr>
+      <tr><td>3</td><td><span class="team"><span class="glyph"><img src="assets/team_BC.png"></span>Bay City</span></td><td class="num">40</td><td class="num">34</td><td class="num">.541</td><td class="num mut">7.0</td><td class="num mut">5-5</td></tr>
+      <tr><td>4</td><td><span class="team"><span class="glyph"><img src="assets/team_RM.png"></span>Riverside Miners</span></td><td class="num">35</td><td class="num">40</td><td class="num">.467</td><td class="num mut">12.5</td><td class="num mut">3-7</td></tr>
+      <tr><td>5</td><td><span class="team"><span class="glyph"><img src="assets/team_GG.png"></span>Golden Gators</span></td><td class="num">31</td><td class="num">44</td><td class="num">.413</td><td class="num mut">16.5</td><td class="num mut">4-6</td></tr>
+    </table></div></div>
+  </section>
+
+  <!-- ===== SCHEDULE ===== -->
+  <section class="view" id="schedule">
+    <div class="tag"><span>Schedule</span></div>
+    <div class="row" style="grid-template-columns:1fr 1fr">
+      <div class="card"><div class="ch red"><h3>Upcoming</h3></div><div class="cb"><table>
+        <tr><td class="mut">Today</td><td>vs Harbor Sharks · Home</td><td class="num" style="text-align:right;color:var(--red)">7:30 PM</td></tr>
+        <tr><td class="mut">06/18</td><td>vs Harbor Sharks · Home</td><td class="num mut" style="text-align:right">7:30 PM</td></tr>
+        <tr><td class="mut">06/20</td><td>@ Bay City · Away</td><td class="num mut" style="text-align:right">6:00 PM</td></tr>
+        <tr><td class="mut">06/21</td><td>@ Bay City · Away</td><td class="num mut" style="text-align:right">6:00 PM</td></tr>
+      </table></div></div>
+      <div class="card"><div class="ch"><h3>Recent Results</h3></div><div class="cb"><table>
+        <tr><td><span class="wl w">W</span></td><td>vs Bay City</td><td class="num" style="text-align:right">5-3</td></tr>
+        <tr><td><span class="wl l">L</span></td><td>vs Bay City</td><td class="num mut" style="text-align:right">2-6</td></tr>
+        <tr><td><span class="wl w">W</span></td><td>@ Golden Gators</td><td class="num" style="text-align:right">7-1</td></tr>
+        <tr><td><span class="wl w">W</span></td><td>@ Golden Gators</td><td class="num" style="text-align:right">4-2</td></tr>
+      </table></div></div>
+    </div>
+  </section>
+
+  <!-- ===== SETTINGS ===== -->
+  <section class="view" id="settings">
+    <div class="tag navy"><span>Settings</span></div>
+    <div class="row" style="grid-template-columns:1fr 1fr">
+      <div class="card"><div class="ch"><h3>Game</h3></div><div class="cb" style="display:flex;flex-direction:column;gap:16px">
+        <label class="opt-row">Game Speed<select><option>Normal</option><option>Instant</option><option>Slow</option></select></label>
+        <label class="opt-row">Season Length<select><option>Short (60)</option><option>Full (162)</option></select></label>
+        <label class="opt-row">Auto-delegate decisions<input type="checkbox"></label>
+      </div></div>
+      <div class="card"><div class="ch red"><h3>Accessibility</h3></div><div class="cb" style="display:flex;flex-direction:column;gap:16px">
+        <label class="opt-row">Voice (TTS)<input id="ttsToggle" type="checkbox" checked></label>
+        <label class="opt-row">TTS Speed<select><option>Normal</option><option>Fast</option><option>Slow</option></select></label>
+        <label class="opt-row">Braille contractions<input type="checkbox" checked></label>
+        <label class="opt-row">Base blink rate<select><option>Normal</option><option>Slow</option></select></label>
+      </div></div>
+    </div>
+  </section>
+
+  <!-- ===== STORE / PACKS (gacha BM) ===== -->
+  <section class="view" id="packs">
+    <div class="tag" style="background:var(--pink)"><span>Store · Player Packs</span></div>
+    <div class="store-head">
+      <div class="gembig"><span class="g">◈</span> <span id="gemBal2">320</span> Gems</div>
+      <button class="btn gold" onclick="buyGems(500)">+ Buy 500 Gems</button>
+      <span class="mut" style="font-family:var(--cond)">Pull rates are shown on every pack.</span>
+    </div>
+    <div class="packgrid">
+      <div class="pack standard" tabindex="0" role="button" aria-label="Standard pack, 50 gems. Bronze 70 percent, Silver 25, Gold 5." onclick="openPack('standard')">
+        <div class="pt">Standard</div><div class="pc"><span>◈</span> 50</div>
+        <div class="odds">Bronze 70%<br>Silver 25%<br>Gold 5%</div>
+        <button class="openbtn" onclick="event.stopPropagation();openPack('standard')">Open</button>
+      </div>
+      <div class="pack premium" tabindex="0" role="button" aria-label="Premium pack, 150 gems. Silver 55, Gold 38, Elite 7." onclick="openPack('premium')">
+        <div class="pt">Premium</div><div class="pc"><span>◈</span> 150</div>
+        <div class="odds">Silver 55%<br>Gold 38%<br>Elite 7%</div>
+        <button class="openbtn" onclick="event.stopPropagation();openPack('premium')">Open</button>
+      </div>
+      <div class="pack elite" tabindex="0" role="button" aria-label="Elite pack, 400 gems. Gold 75, Elite 25. Gold guaranteed." onclick="openPack('elite')">
+        <div class="pt">Elite</div><div class="pc"><span>◈</span> 400</div>
+        <div class="odds">Gold 75%<br>Elite 25%<br>(Gold guaranteed)</div>
+        <button class="openbtn" onclick="event.stopPropagation();openPack('elite')">Open</button>
+      </div>
+    </div>
+    <div class="reveal" id="reveal" aria-live="polite"><div class="hint">Open a pack to reveal a player.</div></div>
+  </section>
+
+</div><!--/content-->
+
+<div class="keystrip" id="keybar"></div>
+
+<nav class="tabbar">
+  <div class="tab active" data-v="dashboard"><span class="em"><img src="assets/tab_home.png"></span><span class="nm">Home</span></div>
+  <div class="tab" data-v="lineup"><span class="em"><img src="assets/tab_team.png"></span><span class="nm">Team</span></div>
+  <div class="tab center" data-v="modes"><span class="em"><img src="assets/tab_match.png"></span><span class="nm">Match</span></div>
+  <div class="tab" data-v="trade"><span class="em"><img src="assets/tab_trade.png"></span><span class="nm">Trade</span></div>
+  <div class="tab" data-v="standings"><span class="em"><img src="assets/tab_league.png"></span><span class="nm">League</span></div>
+</nav>
+
+<script>
+const TITLES={dashboard:'Dashboard',match:'Match',modes:'Game Modes',lineup:'Line-Up',pitchers:'Pitchers',profile:'Player',trade:'Trade',standings:'Standings',schedule:'Schedule',settings:'Settings',packs:'Store'};
+const TABMAP={dashboard:'dashboard',lineup:'lineup',pitchers:'lineup',profile:'lineup',match:'modes',modes:'modes',trade:'trade',standings:'standings',schedule:'standings',settings:null,packs:null};
+const KEYS={
+ dashboard:[["◀","PREV"],["▶","NEXT"],["F1","ENTER"],["F2","BACK"],["F3","MENU"],["F4","READ"]],
+ match:[["◀+F1","SUB P"],["◀+F2","PINCH"],["◀+F3","PLAY"],["◀+F4","SHIFT"],["F1","NEXT"],["F3+F4","SKIP"]],
+ modes:[["◀","PREV"],["▶","NEXT"],["F1","SELECT"],["F2","BACK"]],
+ lineup:[["◀","PREV"],["▶","NEXT"],["F1","SELECT"],["F2","BACK"],["F3","SWAP"],["F4","INFO"]],
+ pitchers:[["◀","PREV"],["▶","NEXT"],["F1","ASSIGN"],["F2","BACK"],["F3","ROLE"],["F4","INFO"]],
+ profile:[["◀","PREV"],["▶","NEXT"],["F2","BACK"],["F4","READ"]],
+ trade:[["◀","PREV"],["▶","NEXT"],["F1","ADD/OK"],["F2","CANCEL"],["F4","COMPARE"]],
+ standings:[["◀","PREV"],["▶","NEXT"],["F2","BACK"],["F4","READ"]],
+ schedule:[["◀","PREV"],["▶","NEXT"],["F1","SELECT"],["F4","INFO"]],
+ settings:[["◀","PREV"],["▶","NEXT"],["F1","TOGGLE"],["F2","BACK"]],
+ packs:[["◀","PREV"],["▶","NEXT"],["F1","OPEN PACK"],["F2","BACK"]]
+};
+function go(v){
+ document.querySelectorAll('.view').forEach(s=>s.classList.toggle('active',s.id===v));
+ const tab=TABMAP[v];
+ document.querySelectorAll('.tab').forEach(a=>a.classList.toggle('active',a.dataset.v===tab));
+ document.getElementById('scrTitle').textContent=TITLES[v]||'';
+ const html='<div class="lead">⚾ DOT PAD</div>'+(KEYS[v]||[]).map(([k,d])=>`<div class="kc"><span class="cap">${k}</span><span class="d">${d}</span></div>`).join('');
+ document.getElementById('keybar').innerHTML=html;
+ const k2=document.getElementById('simkeys2'); if(k2&&v==='match')k2.innerHTML=html;
+ document.querySelector('.content').scrollTop=0;
+ if(v==='match')drawSim();
+ if(window.afterNav)window.afterNav(v);
+}
+document.querySelectorAll('[data-v]').forEach(a=>a.addEventListener('click',()=>go(a.dataset.v)));
+
+/* lineup player cards (use full card art when available) */
+function grade(ov){return ov>=84?'A':ov>=76?'B':'C';}
+document.querySelectorAll('.field .pos').forEach(el=>{
+  const p=el.dataset.p,n=el.dataset.n,ov=+el.dataset.ov,card=el.dataset.card,alt=(ov>=80?'alt':'');
+  el.innerHTML=`<img class="cardimg" src="assets/player_card_${n.split('. ').pop()}.png" alt="${n}" title="${n} · ${p} · OVR ${ov}">`;
+});
+
+/* DOT PAD 60x40 simulator */
+let blink=true;
+function drawSim(){
+ const cv=document.getElementById('simcv'); if(!cv)return;
+ const ctx=cv.getContext('2d'),W=60,H=40,gx=cv.width/W,gy=cv.height/H;
+ const dot=(x,y,c,r)=>{ctx.beginPath();ctx.arc((x+.5)*gx,(y+.5)*gy,r||1.3,0,7);ctx.fillStyle=c;ctx.fill();};
+ // ballpark: night-grass base + mow stripes
+ ctx.fillStyle='#0c2615';ctx.fillRect(0,0,cv.width,cv.height);
+ const inDirt=(x,y)=>Math.abs(x-30)/15 + Math.abs(y-22)/11 <= 1.05;   // infield diamond skin
+ for(let y=0;y<H;y++)for(let x=0;x<W;x++){
+   if(inDirt(x,y)){ dot(x,y,'#7a5230',1.2); }                          // dirt (brown)
+   else{ const stripe=(Math.floor(x/6)%2===0); dot(x,y, stripe?'#1f4a2b':'#173d22',1.1); } // grass mow stripes
+ }
+ const B={H:[30,33],b1:[45,22],b2:[30,11],b3:[15,22]};
+ const bl=(a,b)=>{let[x0,y0]=a,[x1,y1]=b,dx=Math.abs(x1-x0),dy=-Math.abs(y1-y0),sx=x0<x1?1:-1,sy=y0<y1?1:-1,e=dx+dy;for(;;){dot(x0,y0,'#efe6cf',1.3);if(x0===x1&&y0===y1)break;let e2=2*e;if(e2>=dy){e+=dy;x0+=sx}if(e2<=dx){e+=dx;y0+=sy}}}; // cream baselines
+ bl(B.H,B.b1);bl(B.b1,B.b2);bl(B.b2,B.b3);bl(B.b3,B.H);
+ dot(30,22,'#caa06a',1.8);                                            // pitcher's mound
+ [[30,4],[13,7],[47,7],[23,16],[37,16],[17,25],[43,25],[30,36]].forEach(f=>dot(f[0],f[1],'#eaf2ff',1.7)); // fielders (white)
+ const sq=(cx,cy,c)=>{for(let a=0;a<2;a++)for(let b=0;b<2;b++)dot(cx+a,cy+b,c,1.8);};
+ sq(30,33,'#ffffff'); sq(30,11,'#cdbf9a');                            // home (white), empty 2B (cream)
+ const r=blink?'#ffd23c':'#7a6320'; sq(45,22,r); sq(15,22,r);         // runners 1B/3B (gold blink)
+}
+setInterval(()=>{blink=!blink;if(document.getElementById('match').classList.contains('active'))drawSim();},600);
+
+go('dashboard');
+</script>
+<!-- ===== Accessibility + natural TTS + keyboard (works with or without Dot Pad) ===== -->
+<script>
+(function(){
+  const SPEAK={
+    dashboard:"Dashboard. Capital Wings, 42 wins, 31 losses, second in the division. Next game versus Harbor Sharks today.",
+    match:"Match. Bottom of the 5th, 2 outs, runners on first and third, count 2 and 1. Decision point: bring in a reliever, or stay?",
+    modes:"Game modes. Season mode, hit and pitch, quick play, skills showdown, practice.",
+    lineup:"Line-up. Nine fielders on the diamond, and the batting order.",
+    pitchers:"Pitchers. Starting rotation and bullpen, with fatigue levels.",
+    profile:"Player profile. M Bell, left fielder, overall 85, potential 88.",
+    trade:"Trade with Harbor Sharks. Proposal likely to be accepted.",
+    standings:"Standings, East division. Capital Wings second, four and a half games back.",
+    schedule:"Schedule. Next game today, 7:30 PM, versus Harbor Sharks.",
+    settings:"Settings. Game and accessibility options.",
+    packs:"Store. Open player packs. Standard, premium, or elite. Press Open to pull a random player. Pull rates are shown."
+  };
+  // short braille-line status per screen (letters/spaces; numbers render blank in basic table)
+  const BRAILLE={ dashboard:"home cw second", match:"bot five two out", modes:"modes",
+    lineup:"lineup", pitchers:"pitchers", profile:"m bell lf", trade:"trade sharks",
+    standings:"standings", schedule:"next sharks", settings:"settings", packs:"store packs" };
+
+  // ---- natural TTS via Web Speech ----
+  let ttsOn=true, voice=null;
+  function pickVoice(){
+    if(!('speechSynthesis' in window))return;
+    const vs=speechSynthesis.getVoices();
+    const pref=['Google US English','Microsoft AvaMultilingual','Microsoft Aria','Microsoft Jenny','Natural','Neural','Samantha','Google UK English Female'];
+    for(const p of pref){const f=vs.find(v=>v.name&&v.name.includes(p)&&v.lang&&v.lang.startsWith('en'));if(f){voice=f;return;}}
+    voice=vs.find(v=>v.lang&&v.lang.startsWith('en'))||vs[0]||null;
+  }
+  if('speechSynthesis' in window){ pickVoice(); speechSynthesis.onvoiceschanged=pickVoice; }
+  function speak(t,interrupt=true){
+    if(!ttsOn||!('speechSynthesis' in window)||!t)return;
+    if(interrupt)speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(t); if(voice)u.voice=voice; u.rate=1.0; u.pitch=1.0; u.volume=1.0;
+    speechSynthesis.speak(u);
+  }
+  const live=document.getElementById('live');
+  function announce(t){ if(live){live.textContent=''; setTimeout(()=>{live.textContent=t;},30);} speak(t); }
+
+  // field up-pin set (binary tactile diamond) for Dot Pad graphic mirror
+  function fieldUp(){
+    const up=new Set(); const add=(x,y)=>{if(x>=0&&x<60&&y>=0&&y<40)up.add(x+','+y);};
+    const B={H:[30,33],b1:[45,22],b2:[30,11],b3:[15,22]};
+    const line=(a,b)=>{let[x0,y0]=a,[x1,y1]=b,dx=Math.abs(x1-x0),dy=-Math.abs(y1-y0),sx=x0<x1?1:-1,sy=y0<y1?1:-1,e=dx+dy;for(;;){add(x0,y0);if(x0===x1&&y0===y1)break;let e2=2*e;if(e2>=dy){e+=dy;x0+=sx}if(e2<=dx){e+=dx;y0+=sy}}};
+    line(B.H,B.b1);line(B.b1,B.b2);line(B.b2,B.b3);line(B.b3,B.H);
+    [[30,4],[13,7],[47,7],[23,16],[37,16],[17,25],[43,25],[30,22],[30,36]].forEach(f=>add(f[0],f[1]));
+    const sq=(cx,cy)=>{add(cx,cy);add(cx+1,cy);add(cx,cy+1);add(cx+1,cy+1);};
+    sq(30,33);            // home: filled 2x2
+    add(30,11);           // empty base (2B): single pin
+    sq(45,22); sq(15,22); // runners on 1B & 3B: filled 2x2
+    return up;
+  }
+
+  window.BaseDot={ announce, speak, brailleFor:v=>BRAILLE[v]||'', speakFor:v=>SPEAK[v]||v, fieldUp,
+    setTTS:o=>{ttsOn=o; if(!o&&'speechSynthesis' in window)speechSynthesis.cancel();} };
+
+  // hook fired by go(v)
+  window.afterNav=function(v){
+    document.querySelectorAll('.tab').forEach(t=>t.setAttribute('aria-selected', t.classList.contains('active')?'true':'false'));
+    announce(SPEAK[v]||v);
+    if(window.__dotpadRender)window.__dotpadRender(v);
+  };
+
+  // tab semantics + keyboard
+  const tabbar=document.querySelector('.tabbar');
+  if(tabbar){tabbar.setAttribute('role','tablist');tabbar.setAttribute('aria-label','Main navigation');}
+  document.querySelectorAll('.tab').forEach(t=>{ t.setAttribute('role','tab'); t.setAttribute('tabindex','0');
+    t.setAttribute('aria-label',(t.querySelector('.nm')||{}).textContent||'tab');
+    t.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){e.preventDefault();t.click();} });
+  });
+
+  const order=['dashboard','lineup','modes','trade','standings'];
+  const curView=()=>document.querySelector('.view.active').id;
+  const curTab=()=>{const a=document.querySelector('.tab.active');return a?a.dataset.v:'dashboard';};
+  function inForm(){const a=document.activeElement;return a&&/^(INPUT|SELECT|TEXTAREA)$/.test(a.tagName);}
+  // keyboard mirror of Dot Pad keys (for sighted testing / keyboard-only users)
+  document.addEventListener('keydown',e=>{
+    if(inForm())return;
+    const k=e.key.toLowerCase();
+    if(e.key==='ArrowRight'){e.preventDefault();let i=order.indexOf(curTab());go(order[(i+1)%order.length]);}
+    else if(e.key==='ArrowLeft'){e.preventDefault();let i=order.indexOf(curTab());go(order[(i+order.length-1)%order.length]);}
+    else if(e.key==='Enter'){ if(curView()==='dashboard'||curView()==='modes')go('match'); }
+    else if(e.key==='Escape'){go('dashboard');}
+    else if(k==='r'){announce(SPEAK[curView()]||'');}
+    else if(k==='h'){go('dashboard');}
+  });
+
+  // wire TTS toggle
+  const ttsCb=document.getElementById('ttsToggle');
+  if(ttsCb)ttsCb.addEventListener('change',()=>{window.BaseDot.setTTS(ttsCb.checked); if(ttsCb.checked)announce('Voice on');});
+
+  // first announce (after a user gesture autoplay may gate; also re-announce on first interaction)
+  let greeted=false;
+  function greet(){ if(greeted)return; greeted=true; announce("BaseDot ready. Use left and right to move between tabs, Enter to start a match, R to read the screen, and Connect Dot Pad for tactile output."); }
+  window.addEventListener('pointerdown',greet,{once:true});
+  window.addEventListener('keydown',greet,{once:true});
+})();
+</script>
+
+<!-- ===== Dot Pad device integration (DotPad Web SDK 3.0.0). Requires HTTPS or localhost for Web Bluetooth. ===== -->
+<script type="module">
+  import { DotPadSDK, DotPadScanner, DisplayMode, KeyCodes, DataCodes } from './assets/DotPadSDK-3.0.0.js';
+  const sdk=new DotPadSDK(), scanner=new DotPadScanner(); let dev=null;
+  const statusEl=document.getElementById('dpStatus'), btn=document.getElementById('dpConnect');
+  function setStatus(t,ok){ if(statusEl)statusEl.textContent=t; if(btn)btn.classList.toggle('ok',!!ok); }
+
+  // ---- basic 6-dot braille table (dot1=1..dot6=32). Best-effort; production should use a braille engine. ----
+  const BR={' ':0,'a':1,'b':3,'c':9,'d':25,'e':17,'f':11,'g':27,'h':19,'i':10,'j':26,'k':5,'l':7,'m':13,'n':29,'o':21,'p':15,'q':31,'r':23,'s':14,'t':30,'u':37,'v':39,'w':58,'x':45,'y':61,'z':53,'-':36,'.':50,':':18};
+  function brailleHex(str,cells=20){ str=(str||'').toLowerCase(); let out='';
+    for(let i=0;i<cells;i++){ const v=(i<str.length)?(BR[str[i]]??0):0; out+=(v&0xff).toString(16).padStart(2,'0'); }
+    return out.toUpperCase();
+  }
+  function graphicHex(up){ const COLS=30,ROWS=10; let hex='';
+    const px=[[0,0,0],[0,1,1],[0,2,2],[0,3,3],[1,0,4],[1,1,5],[1,2,6],[1,3,7]];
+    for(let cr=0;cr<ROWS;cr++)for(let cc=0;cc<COLS;cc++){ let b=0;
+      for(const[dx,dy,bit]of px){ if(up.has((cc*2+dx)+','+(cr*4+dy)))b|=(1<<bit); }
+      hex+=b.toString(16).padStart(2,'0'); }
+    return hex.toUpperCase();
+  }
+  function render(v){ if(!dev)return; try{
+      sdk.displayTextData(brailleHex(window.BaseDot.brailleFor(v)), dev, DisplayMode.TextMode);
+      if(v==='match') sdk.displayGraphicData(graphicHex(window.BaseDot.fieldUp()), dev, DisplayMode.GraphicMode);
+      else sdk.displayGraphicData('00'.repeat(300), dev, DisplayMode.GraphicMode);
+    }catch(err){ console.warn('DotPad render error',err); }
+  }
+  window.__dotpadRender=render;
+
+  function onKey(device,code){
+    const order=['dashboard','lineup','modes','trade','standings'];
+    const cur=(document.querySelector('.tab.active')||{}).dataset?.v||'dashboard';
+    const view=document.querySelector('.view.active').id; let i=order.indexOf(cur); if(i<0)i=0;
+    switch(code){
+      case KeyCodes.PanningLeft:  window.go(order[(i+order.length-1)%order.length]); break;
+      case KeyCodes.PanningRight: window.go(order[(i+1)%order.length]); break;
+      case KeyCodes.PanningAll:   window.go('dashboard'); break;
+      case KeyCodes.KeyFunction1: (view==='dashboard'||view==='modes')?window.go('match'):(view==='packs'?window.openPack('premium'):window.BaseDot.announce('Confirm')); break;
+      case KeyCodes.KeyFunction2: window.go('dashboard'); break;
+      case KeyCodes.KeyFunction3: window.BaseDot.announce('Action menu'); break;
+      case KeyCodes.KeyFunction4: window.BaseDot.announce(window.BaseDot.speakFor(view)); break;
+      case KeyCodes.LPF1:         window.BaseDot.announce('Pitching change. Bring in B Foster, the closer?'); break;
+      case KeyCodes.KeyFunction34:window.BaseDot.announce('Skip to next decision'); break;
+      default: break;
+    }
+  }
+  async function connect(){
+    if(!navigator.bluetooth){ setStatus('No Web Bluetooth (use HTTPS/Chrome)',false); window.BaseDot.announce('Web Bluetooth is not available. Open over HTTPS in Chrome.'); return; }
+    try{
+      setStatus('Scanning…');
+      const bt=await scanner.startBleScan(); if(!bt){ setStatus('No device selected',false); return; }
+      sdk.setCallBack((d,code)=>{
+        if(code===DataCodes.Connected){ dev=d; setStatus('Dot Pad connected',true); btn.textContent='Dot Pad ✓'; window.BaseDot.announce('Dot Pad connected.'); render(document.querySelector('.view.active').id); }
+        else if(code===DataCodes.Disconnected){ dev=null; setStatus('Disconnected',false); btn.textContent='Connect Dot Pad'; }
+      }, (d,code)=>onKey(d,code));
+      const dd=await sdk.connectBleDevice(bt);
+      if(!dd){ setStatus('Connect failed',false); }
+    }catch(err){ setStatus('BLE error',false); console.error(err); }
+  }
+  if(btn)btn.addEventListener('click',connect);
+</script>
+
+<script>
+(function(){
+  const POOL=[
+    {n:"J. Maddox",p:"P",ov:94,r:"elite"},{n:"R. Vance",p:"SS",ov:91,r:"elite"},{n:"D. Crowe",p:"CF",ov:90,r:"elite"},
+    {n:"M. Bell",p:"LF",ov:85,r:"gold"},{n:"T. Holt",p:"3B",ov:84,r:"gold"},{n:"B. Foster",p:"RP",ov:83,r:"gold"},
+    {n:"J. Donovan",p:"P",ov:82,r:"gold"},{n:"C. Reed",p:"RF",ov:81,r:"gold"},{n:"J. Sullivan",p:"SS",ov:80,r:"gold"},
+    {n:"T. Brooks",p:"CF",ov:77,r:"silver"},{n:"D. Cooper",p:"1B",ov:76,r:"silver"},{n:"M. Reyes",p:"P",ov:75,r:"silver"},
+    {n:"A. Hill",p:"RP",ov:74,r:"silver"},{n:"K. Parker",p:"RF",ov:72,r:"silver"},
+    {n:"J. Russo",p:"C",ov:68,r:"bronze"},{n:"P. Nolan",p:"RP",ov:66,r:"bronze"},{n:"G. Owens",p:"RP",ov:64,r:"bronze"},{n:"L. Day",p:"2B",ov:61,r:"bronze"}
+  ];
+  const PACKS={ standard:{cost:50,odds:[["bronze",70],["silver",25],["gold",5]]},
+    premium:{cost:150,odds:[["silver",55],["gold",38],["elite",7]]},
+    elite:{cost:400,odds:[["gold",75],["elite",25]]} };
+  const RN={bronze:"Bronze",silver:"Silver",gold:"Gold",elite:"Elite"};
+  let gems=320;
+  function setGems(v){gems=v;["gemBal","gemBal2"].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=gems;});}
+  function pick(odds){let r=Math.random()*100,a=0;for(const[x,p]of odds){a+=p;if(r<=a)return x;}return odds[odds.length-1][0];}
+  function randOf(r){const c=POOL.filter(x=>x.r===r);return c[Math.floor(Math.random()*c.length)]||POOL[POOL.length-1];}
+  window.buyGems=function(n){setGems(gems+n);window.BaseDot&&window.BaseDot.announce("Added "+n+" gems. Balance "+gems+" gems.");};
+  window.openPack=function(tier){
+    const pk=PACKS[tier],rev=document.getElementById('reveal');if(!pk||!rev)return;
+    if(gems<pk.cost){rev.classList.remove('show');rev.innerHTML='<div class="hint">Not enough gems \u2014 buy more above.</div>';window.BaseDot&&window.BaseDot.announce("Not enough gems. The "+RN[tier]+" pack costs "+pk.cost+". You have "+gems+". Buy more gems.");return;}
+    setGems(gems-pk.cost);
+    const rar=pick(pk.odds),pl=randOf(rar),init=pl.n.split('. ').pop()[0];
+    rev.classList.remove('show');rev.innerHTML='<div class="hint">Opening\u2026</div>';void rev.offsetWidth;
+    rev.innerHTML='<div class="flare"></div><div class="pullcard"><div class="ptop rar-'+rar+'"><span class="pbadge badge-'+rar+'">'+RN[rar]+'</span><span class="povr">'+pl.ov+'</span>'+init+'</div><div class="pbot"><div class="pnm">'+pl.n+'</div><div class="ppos">'+pl.p+' \u00b7 OVR '+pl.ov+'</div></div></div>';
+    void rev.offsetWidth;rev.classList.add('show');
+    const walk=(rar==='elite')?' A walkout!':(rar==='gold'?' Nice pull!':'.');
+    window.BaseDot&&window.BaseDot.announce(RN[tier]+" pack opened. You pulled "+pl.n+", "+pl.ov+" overall, "+RN[rar]+walk+" "+gems+" gems left.");
+  };
+  document.addEventListener('keydown',function(e){
+    const a=document.activeElement;if(a&&/^(INPUT|SELECT|TEXTAREA)$/.test(a.tagName))return;
+    const v=document.querySelector('.view.active');
+    if(v&&v.id==='packs'&&e.key==='Enter'&&!(a&&a.classList.contains('pack'))){e.preventDefault();window.openPack('premium');}
+  });
+  setGems(320);
+})();
+</script>
+<script>
+(function(){
+  const t=document.getElementById('title'), btn=document.getElementById('playBall');
+  function enter(){ if(!t||t.classList.contains('hidden'))return; t.classList.add('hidden');
+    const m=document.getElementById('main'); if(m&&m.focus)m.focus();
+    window.BaseDot&&window.BaseDot.announce("Play ball! "+(window.BaseDot.speakFor?window.BaseDot.speakFor('dashboard'):"")); }
+  window.__titleEnter=enter;
+  if(btn){ btn.addEventListener('click',enter); }
+  // while title is up, swallow nav keys; Enter/Space starts
+  document.addEventListener('keydown',function(e){
+    if(t&&!t.classList.contains('hidden')){
+      if(e.key==='Enter'||e.key===' '){e.preventDefault();enter();}
+      else if(e.key!=='Tab'){e.stopPropagation();}
+    }
+  },true);
+  window.addEventListener('load',function(){ if(btn)btn.focus(); window.BaseDot&&window.BaseDot.announce("BaseDot. Virtual Baseball League. Play hard, hit harder. Press Play Ball to start."); });
+})();
+</script>
+</body>
+</html>
