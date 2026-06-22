@@ -589,7 +589,7 @@ body{background:linear-gradient(rgba(8,16,38,.5),rgba(8,16,38,.62)),url('assets/
       </div></div>
       <div class="card"><div class="ch red"><h3>Accessibility</h3></div><div class="cb" style="display:flex;flex-direction:column;gap:16px">
         <label class="opt-row">Voice (TTS)<input id="ttsToggle" type="checkbox" checked></label>
-        <label class="opt-row">Stadium announcer<input id="annToggle" type="checkbox" checked></label>
+        <label class="opt-row">Stadium announcer<input id="annToggle" type="checkbox"></label>
         <label class="opt-row">TTS Speed<select><option>Normal</option><option>Fast</option><option>Slow</option></select></label>
         <label class="opt-row">Braille contractions<input type="checkbox" checked></label>
         <label class="opt-row">Base blink rate<select><option>Normal</option><option>Slow</option></select></label>
@@ -756,7 +756,7 @@ go('dashboard');
 
   // ---- stadium PA announcer (pre-rendered Harrison voice clips) ----
   // Hype/flavor only; informational TTS above stays the clear standard voice for accessibility.
-  let annOn=true;
+  let annOn=false; // default OFF — avoids overlapping the standard TTS. Toggle in Settings to enable.
   const ANN={ title:'assets/ann_title.mp3', firstpitch:'assets/ann_firstpitch.mp3',
     decision:'assets/ann_decision.mp3', ballgame:'assets/ann_ballgame.mp3',
     gold:'assets/ann_gold.mp3', elite:'assets/ann_elite.mp3',
