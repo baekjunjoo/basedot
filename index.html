@@ -65,20 +65,21 @@ h1,h2,h3{font-weight:normal}
 .hero .ribbon{position:relative;z-index:2;width:340px;height:90px;margin:0 auto -2px;background:url('assets/hero_ribbon.png') center/contain no-repeat;display:flex;align-items:center;justify-content:center}
 .hero .ribbon span{font-family:var(--head);font-weight:800;font-style:italic;letter-spacing:1px;text-transform:uppercase;color:#fff;font-size:22px;text-shadow:0 2px 4px rgba(0,0,0,.55);transform:translateY(-6px)}
 .hero .tg2{position:relative;z-index:2;font-family:var(--cond);font-style:italic;letter-spacing:1.5px;font-size:13px;color:var(--gold);text-transform:uppercase}
-.hero .pcut{position:absolute;bottom:0;height:100%;z-index:2}
+.hero .pcut{position:absolute;bottom:0;height:84%;z-index:2}
 .hero .pcut img{height:100%;object-fit:contain;object-position:bottom}
-.hero .pcut.l{left:0} .hero .pcut.r{right:0}
+.hero .pcut.l{left:-10px} .hero .pcut.r{right:-10px}
 .hero .pcut.l img{filter:drop-shadow(3px 0 0 rgba(255,255,255,.5))}
-.hero .inner{position:relative;z-index:2;text-align:center;padding:22px}
+.hero .inner{position:relative;z-index:3;text-align:center;padding:18px;max-width:600px;margin:0 auto}
 .hero .tg{font-family:var(--cond);font-style:italic;letter-spacing:2px;font-size:12px;color:var(--gold);text-transform:uppercase}
-.hero .teams{display:flex;align-items:center;justify-content:center;gap:38px;margin:22px 0}
-.tbadge .lg{width:86px;height:86px;margin:0 auto 10px;display:flex;align-items:center;justify-content:center}
-.tbadge .lg img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 3px 6px rgba(0,0,0,.4))}
-.tbadge .nm{font-family:var(--head);font-weight:800;font-style:italic;letter-spacing:.5px;font-size:18px;text-transform:uppercase}
-.tbadge .rec{font-family:var(--cond);font-size:12px;opacity:.9}
-.vsbig{width:132px;height:132px;background:url('assets/hero_vs.png') center/contain no-repeat;font-size:0;color:transparent;filter:drop-shadow(0 4px 10px rgba(0,0,0,.5))}
+.hero .teams{display:flex;align-items:center;justify-content:center;gap:26px;margin:14px 0}
+.tbadge{background:rgba(8,14,34,.42);border-radius:12px;padding:8px 14px;backdrop-filter:blur(1px)}
+.tbadge .lg{width:84px;height:84px;margin:0 auto 8px;display:flex;align-items:center;justify-content:center}
+.tbadge .lg img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 3px 6px rgba(0,0,0,.5))}
+.tbadge .nm{font-family:var(--head);font-weight:800;font-style:italic;letter-spacing:.5px;font-size:18px;text-transform:uppercase;text-shadow:0 2px 6px rgba(0,0,0,.85)}
+.tbadge .rec{font-family:var(--cond);font-size:12px;opacity:.95;text-shadow:0 1px 4px rgba(0,0,0,.85)}
+.vsbig{width:128px;height:128px;background:url('assets/hero_vs.png') center/contain no-repeat;font-size:0;color:transparent;filter:drop-shadow(0 4px 10px rgba(0,0,0,.5));flex:0 0 auto}
 .hero .tg{font-size:14px}
-.hero .meta{font-family:var(--cond);font-size:15px;opacity:.95;margin-top:4px}.hero .meta b{color:var(--gold)}
+.hero .meta{font-family:var(--cond);font-size:15px;opacity:.97;margin-top:6px;display:inline-block;background:rgba(8,14,34,.5);padding:5px 16px;border-radius:20px;text-shadow:0 1px 4px rgba(0,0,0,.85)}.hero .meta b{color:var(--gold)}
 .hero .play{margin-top:24px;font-family:var(--head);font-weight:800;font-style:italic;letter-spacing:.5px;background:linear-gradient(180deg,#ffd24d,var(--gold));
   color:#5a3d00;border:2px solid #fff;border-radius:10px;padding:13px 34px;cursor:pointer;box-shadow:0 4px 0 #b88600;font-size:19px;text-transform:uppercase}
 
