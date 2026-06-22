@@ -277,8 +277,12 @@ select{font-family:var(--body);border:1px solid var(--pline);border-radius:6px;p
 #title .util .uc{width:46px;height:46px;border-radius:50%;border:2px solid rgba(255,255,255,.5);display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff}
 #title .util:hover,#title .util:focus-visible{color:#fff}
 #title .tl-dp{position:absolute;bottom:18px;font-family:var(--cond);font-size:11px;color:#8fa2c8;letter-spacing:1.5px;text-transform:uppercase}
-.pack .packimg{width:100%;height:150px;object-fit:contain;margin-bottom:8px;filter:drop-shadow(0 6px 14px rgba(0,0,0,.5))}
-.pack{justify-content:flex-start}
+.pack .packimg{width:auto;height:172px;max-width:60%;object-fit:contain;margin:4px auto 12px;display:block;filter:drop-shadow(0 6px 14px rgba(0,0,0,.5))}
+/* bigger pack tiles + inner padding that clears the ornate frame so all text shows */
+.packgrid{gap:24px}
+.pack{justify-content:flex-start;min-height:360px;padding:34px 46px 30px;text-align:center}
+.pack .pc{justify-content:center}
+.pack .odds{text-align:left}
 .ctr img.gem{border-radius:0;object-fit:contain;background:none}
 .gembig .gemimg{width:22px;height:22px;object-fit:contain;vertical-align:middle}
 #title .tl-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;opacity:.6}
