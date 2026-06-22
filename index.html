@@ -162,9 +162,9 @@ td{padding:8px 6px;border-bottom:1px solid var(--pline)}tr:last-child td{border:
 .mc b{font-family:var(--head);font-weight:800;font-style:italic;font-size:16px;text-transform:uppercase}.mc .ln{font-family:var(--cond);font-size:11px;color:var(--muted);margin-top:5px;line-height:1.5}
 
 /* MODES */
-.modegrid{display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:16px}
+.modegrid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
 .mode{position:relative;border-radius:10px;overflow:hidden;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.3);aspect-ratio:1/1}
-.mode.big{grid-row:span 2;aspect-ratio:auto}
+.mode.big{grid-column:1/-1;aspect-ratio:16/9}
 .mode img{width:100%;height:100%;object-fit:cover;display:block}
 .mode .ml{position:absolute;left:14px;bottom:12px;font-family:var(--head);font-weight:800;font-style:italic;font-size:22px;color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.7);text-transform:uppercase}
 
@@ -285,9 +285,11 @@ select{font-family:var(--body);border:1px solid var(--pline);border-radius:6px;p
 /* ===== Arcade skin kit ===== */
 body{background:linear-gradient(rgba(8,16,38,.5),rgba(8,16,38,.62)),url('assets/bg_arcade.jpg') center/cover fixed !important}
 .hdr{background:url('assets/header_bar.jpg') center/cover,linear-gradient(180deg,#2277de,#1763c8) !important}
-.playball,.play,.openbtn,.btn.gold{background:url('assets/btn_gold.png') center/100% 100% no-repeat !important;border:none !important;box-shadow:0 6px 14px rgba(0,0,0,.35) !important;color:#5a3d00 !important}
-.opt{background:url('assets/btn_red.png') center/100% 100% no-repeat !important;border:none !important;color:#fff}
-.opt.sel{background:url('assets/btn_gold.png') center/100% 100% no-repeat !important;color:#5a3d00}
+/* crisp CSS buttons — replaced stretched PNG skins that distorted at non-native sizes */
+.opt{background:linear-gradient(180deg,#f4565c,#e23b41 60%,#c01f27) !important;border:2px solid rgba(255,255,255,.9) !important;color:#fff !important;box-shadow:0 3px 0 #8a1418,0 6px 14px rgba(0,0,0,.3) !important}
+.opt.sel{background:linear-gradient(180deg,#ffd24d,#f4b41a 60%,#d99500) !important;border:2px solid #fff !important;color:#5a3d00 !important;box-shadow:0 3px 0 #b88600,0 6px 14px rgba(0,0,0,.3) !important}
+/* season hero: full-width banner, keep whole width (no side cropping) */
+.mode.big img{object-fit:cover !important;object-position:center !important}
 .rate{background:url('assets/ovr_badge.png') center/contain no-repeat !important;background-color:transparent !important;color:#fff !important;width:44px;height:44px;display:inline-flex;align-items:center;justify-content:center;border-radius:0 !important;padding:0 !important;font-family:var(--stat);font-weight:700;text-shadow:0 1px 3px #000}
 .rk.medal{width:32px;height:36px;background-position:center;background-repeat:no-repeat;background-size:contain;color:transparent !important;font-size:0;filter:drop-shadow(0 2px 3px rgba(0,0,0,.4))}
 .tag{background:url('assets/ribbon_red.png') center/100% 100% no-repeat !important;clip-path:none !important;transform:none !important;box-shadow:none !important;padding:10px 34px !important;color:#fff}
