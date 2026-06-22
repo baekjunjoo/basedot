@@ -589,6 +589,7 @@ body{background:linear-gradient(rgba(8,16,38,.5),rgba(8,16,38,.62)),url('assets/
       </div></div>
       <div class="card"><div class="ch red"><h3>Accessibility</h3></div><div class="cb" style="display:flex;flex-direction:column;gap:16px">
         <label class="opt-row">Voice (TTS)<input id="ttsToggle" type="checkbox" checked></label>
+        <label class="opt-row">Stadium announcer<input id="annToggle" type="checkbox" checked></label>
         <label class="opt-row">TTS Speed<select><option>Normal</option><option>Fast</option><option>Slow</option></select></label>
         <label class="opt-row">Braille contractions<input type="checkbox" checked></label>
         <label class="opt-row">Base blink rate<select><option>Normal</option><option>Slow</option></select></label>
@@ -753,15 +754,61 @@ go('dashboard');
     return up;
   }
 
+  // ---- stadium PA announcer (pre-rendered Harrison voice clips) ----
+  // Hype/flavor only; informational TTS above stays the clear standard voice for accessibility.
+  let annOn=true;
+  const ANN={ title:'assets/ann_title.mp3', firstpitch:'assets/ann_firstpitch.mp3',
+    decision:'assets/ann_decision.mp3', ballgame:'assets/ann_ballgame.mp3',
+    gold:'assets/ann_gold.mp3', elite:'assets/ann_elite.mp3',
+    winner:'assets/ann_winner.mp3', homerun:'assets/ann_homerun.mp3' };
+  const annAudio={};
+  for(const k in ANN){ try{ const a=new Audio(ANN[k]); a.preload='auto'; a.volume=0.92; annAudio[k]=a; }catch(e){} }
+  let annCur=null, annQueueTimer=null;
+  function playAnnouncer(key){
+    if(!annOn)return 0;
+    const a=annAudio[key]; if(!a)return 0;
+    try{ if(annCur&&!annCur.paused){annCur.pause();annCur.currentTime=0;} annCur=a; a.currentTime=0;
+      const p=a.play(); if(p&&p.catch)p.catch(()=>{});
+    }catch(e){}
+    return (a.duration&&isFinite(a.duration))?Math.round(a.duration*1000):2600;
+  }
+  function playAnnouncerSeq(keys){ // play clips back-to-back
+    if(!annOn||!keys.length)return; clearTimeout(annQueueTimer);
+    const d=playAnnouncer(keys[0]); const rest=keys.slice(1);
+    if(rest.length)annQueueTimer=setTimeout(()=>playAnnouncerSeq(rest), d+120);
+  }
+
   window.BaseDot={ announce, speak, brailleFor:v=>BRAILLE[v]||'', speakFor:v=>SPEAK[v]||v, fieldUp,
+    playAnnouncer, playAnnouncerSeq,
+    setAnnouncer:o=>{ annOn=o; if(!o&&annCur){try{annCur.pause();}catch(e){}} },
     setTTS:o=>{ttsOn=o; if(!o&&'speechSynthesis' in window)speechSynthesis.cancel();} };
 
   // hook fired by go(v)
   window.afterNav=function(v){
     document.querySelectorAll('.tab').forEach(t=>t.setAttribute('aria-selected', t.classList.contains('active')?'true':'false'));
-    announce(SPEAK[v]||v);
+    if(v==='match'){ const d=playAnnouncer('firstpitch'); setTimeout(()=>announce(SPEAK[v]||v), (d>0?d:0)); }
+    else announce(SPEAK[v]||v);
     if(window.__dotpadRender)window.__dotpadRender(v);
   };
+
+  // decision option clicks → clutch announcer line
+  document.querySelectorAll('#match .decision .opt').forEach(o=>{
+    o.addEventListener('click',()=>{
+      document.querySelectorAll('#match .decision .opt').forEach(x=>x.classList.remove('sel'));
+      o.classList.add('sel');
+      playAnnouncer('ballgame');
+    });
+    o.setAttribute('tabindex','0'); o.setAttribute('role','button');
+    o.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){e.preventDefault();o.click();} });
+  });
+  // match scoreboard → "highlight reel": big hit, then winner call
+  const mboard=document.querySelector('#match .board');
+  if(mboard){ mboard.style.cursor='pointer'; mboard.setAttribute('role','button'); mboard.setAttribute('tabindex','0');
+    mboard.setAttribute('aria-label','Play highlight reel');
+    const hl=()=>playAnnouncerSeq(['homerun','winner']);
+    mboard.addEventListener('click',hl);
+    mboard.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){e.preventDefault();hl();} });
+  }
 
   // tab semantics + keyboard
   const tabbar=document.querySelector('.tabbar');
@@ -790,6 +837,8 @@ go('dashboard');
   // wire TTS toggle
   const ttsCb=document.getElementById('ttsToggle');
   if(ttsCb)ttsCb.addEventListener('change',()=>{window.BaseDot.setTTS(ttsCb.checked); if(ttsCb.checked)announce('Voice on');});
+  const annCb=document.getElementById('annToggle');
+  if(annCb)annCb.addEventListener('change',()=>{window.BaseDot.setAnnouncer(annCb.checked); if(annCb.checked)playAnnouncer('winner'); else announce('Announcer off');});
 
   // first announce (after a user gesture autoplay may gate; also re-announce on first interaction)
   let greeted=false;
@@ -839,7 +888,7 @@ go('dashboard');
       case KeyCodes.KeyFunction2: window.go('dashboard'); break;
       case KeyCodes.KeyFunction3: window.BaseDot.announce('Action menu'); break;
       case KeyCodes.KeyFunction4: window.BaseDot.announce(window.BaseDot.speakFor(view)); break;
-      case KeyCodes.LPF1:         window.BaseDot.announce('Pitching change. Bring in B Foster, the closer?'); break;
+      case KeyCodes.LPF1:         window.BaseDot.playAnnouncer&&window.BaseDot.playAnnouncer('decision'); window.BaseDot.announce('Pitching change. Bring in B Foster, the closer?'); break;
       case KeyCodes.KeyFunction34:window.BaseDot.announce('Skip to next decision'); break;
       default: break;
     }
@@ -888,7 +937,10 @@ go('dashboard');
     rev.innerHTML='<div class="flare"></div><div class="pullcard"><div class="ptop rar-'+rar+'"><span class="pbadge badge-'+rar+'">'+RN[rar]+'</span><span class="povr">'+pl.ov+'</span>'+init+'</div><div class="pbot"><div class="pnm">'+pl.n+'</div><div class="ppos">'+pl.p+' \u00b7 OVR '+pl.ov+'</div></div></div>';
     void rev.offsetWidth;rev.classList.add('show');
     const walk=(rar==='elite')?' A walkout!':(rar==='gold'?' Nice pull!':'.');
-    window.BaseDot&&window.BaseDot.announce(RN[tier]+" pack opened. You pulled "+pl.n+", "+pl.ov+" overall, "+RN[rar]+walk+" "+gems+" gems left.");
+    const B=window.BaseDot;
+    const dur=(B&&B.playAnnouncer)?(rar==='elite'?B.playAnnouncer('elite'):rar==='gold'?B.playAnnouncer('gold'):0):0;
+    const msg=RN[tier]+" pack opened. You pulled "+pl.n+", "+pl.ov+" overall, "+RN[rar]+walk+" "+gems+" gems left.";
+    if(B){ if(dur>0)setTimeout(()=>B.announce(msg),dur+150); else B.announce(msg); }
   };
   document.addEventListener('keydown',function(e){
     const a=document.activeElement;if(a&&/^(INPUT|SELECT|TEXTAREA)$/.test(a.tagName))return;
@@ -903,7 +955,12 @@ go('dashboard');
   const t=document.getElementById('title'), btn=document.getElementById('playBall');
   function enter(){ if(!t||t.classList.contains('hidden'))return; t.classList.add('hidden');
     const m=document.getElementById('main'); if(m&&m.focus)m.focus();
-    window.BaseDot&&window.BaseDot.announce("Play ball! "+(window.BaseDot.speakFor?window.BaseDot.speakFor('dashboard'):"")); }
+    const B=window.BaseDot; if(!B)return;
+    const dash=B.speakFor?B.speakFor('dashboard'):"";
+    const d=B.playAnnouncer?B.playAnnouncer('title'):0;       // PA: "Welcome to BaseDot... Play ball!"
+    if(d>0){ setTimeout(()=>B.announce(dash), d+150); }        // then clear TTS reads the dashboard
+    else { B.announce("Play ball! "+dash); }
+  }
   window.__titleEnter=enter;
   if(btn){ btn.addEventListener('click',enter); }
   // while title is up, swallow nav keys; Enter/Space starts
