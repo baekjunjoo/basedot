@@ -265,6 +265,7 @@ select{font-family:var(--body);border:1px solid var(--pline);border-radius:6px;p
 #title.hidden{display:none}
 #title>*{position:relative;z-index:1}
 #title .tl-mark{font-family:var(--bebas);font-size:clamp(64px,12vw,150px);letter-spacing:6px;line-height:.9;text-transform:uppercase;text-shadow:0 6px 0 rgba(0,0,0,.35)}
+#title .tl-logo{width:min(640px,84vw);height:auto;display:block;filter:drop-shadow(0 10px 26px rgba(0,0,0,.55))}
 #title .tl-mark .dot{color:var(--red)}
 #title .tl-sub{font-family:var(--head);font-weight:800;font-style:italic;letter-spacing:4px;color:var(--gold);font-size:clamp(13px,2.2vw,20px);margin-top:8px;text-transform:uppercase}
 #title .tl-tag{font-family:var(--head);font-weight:900;font-style:italic;font-size:clamp(22px,4vw,40px);text-transform:uppercase;margin-top:28px;line-height:1;text-shadow:0 3px 0 rgba(0,0,0,.4)}
@@ -285,7 +286,7 @@ select{font-family:var(--body);border:1px solid var(--pline);border-radius:6px;p
 
 <!-- ===== HEADER ===== -->
 <section id="title" role="dialog" aria-label="BaseDot title screen">
-  <div class="tl-mark">BASE<span class="dot">DOT</span></div>
+  <img class="tl-logo" src="assets/title_logo.png" alt="BaseDot">
   <div class="tl-sub">Virtual Baseball League</div>
   <div class="tl-tag">Play Hard.<br><span class="hl">Hit Harder.</span></div>
   <button class="playball" id="playBall" aria-label="Play Ball — enter the game">Play Ball</button>
