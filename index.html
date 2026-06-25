@@ -253,7 +253,7 @@ select{font-family:var(--body);border:1px solid var(--pline);border-radius:6px;p
 .pack .pt{font-family:var(--head);font-style:italic;font-size:24px;letter-spacing:.5px;text-transform:uppercase}
 .pack .pc{font-family:var(--stat);font-weight:700;color:var(--gold);font-size:16px;margin:3px 0 8px;display:flex;align-items:center;gap:5px}
 .pack .odds{font-family:var(--cond);font-size:11px;line-height:1.6;color:rgba(255,255,255,.9);background:rgba(0,0,0,.28);border-radius:8px;padding:8px 10px}
-.pack .openbtn{margin-top:10px;font-family:var(--head);font-style:italic;text-transform:uppercase;background:var(--gold);color:#5a3d00;border:2px solid #fff;border-radius:9px;padding:8px;cursor:pointer;box-shadow:0 3px 0 #b88600;font-size:14px}
+.pack .openbtn{display:block;text-align:center;margin-top:10px;font-family:var(--head);font-style:italic;text-transform:uppercase;background:var(--gold);color:#5a3d00;border:2px solid #fff;border-radius:9px;padding:8px;cursor:pointer;box-shadow:0 3px 0 #b88600;font-size:14px}
 .reveal{margin-top:18px;min-height:300px;display:flex;align-items:center;justify-content:center;border-radius:12px;background:#0c1730;position:relative;overflow:hidden;perspective:800px}
 .reveal .hint{color:var(--muted);font-family:var(--cond)}
 .flare{position:absolute;width:540px;height:540px;border-radius:50%;opacity:0;background:radial-gradient(rgba(255,255,255,.55),transparent 60%)}
@@ -630,17 +630,17 @@ body{background:linear-gradient(rgba(8,16,38,.5),rgba(8,16,38,.62)),url('assets/
       <div class="pack standard" tabindex="0" role="button" aria-label="Standard pack, 50 gems. Bronze 70 percent, Silver 25, Gold 5." onclick="openPack('standard')">
         <img class="packimg" src="assets/pack_standard.png" alt=""><div class="pt">Standard</div><div class="pc"><span>◈</span> 50</div>
         <div class="odds">Bronze 70%<br>Silver 25%<br>Gold 5%</div>
-        <button class="openbtn" onclick="event.stopPropagation();openPack('standard')">Open</button>
+        <span class="openbtn" aria-hidden="true">Open</span>
       </div>
       <div class="pack premium" tabindex="0" role="button" aria-label="Premium pack, 150 gems. Silver 55, Gold 38, Elite 7." onclick="openPack('premium')">
         <img class="packimg" src="assets/pack_premium.png" alt=""><div class="pt">Premium</div><div class="pc"><span>◈</span> 150</div>
         <div class="odds">Silver 55%<br>Gold 38%<br>Elite 7%</div>
-        <button class="openbtn" onclick="event.stopPropagation();openPack('premium')">Open</button>
+        <span class="openbtn" aria-hidden="true">Open</span>
       </div>
       <div class="pack elite" tabindex="0" role="button" aria-label="Elite pack, 400 gems. Gold 75, Elite 25. Gold guaranteed." onclick="openPack('elite')">
         <img class="packimg" src="assets/pack_elite.png" alt=""><div class="pt">Elite</div><div class="pc"><span>◈</span> 400</div>
         <div class="odds">Gold 75%<br>Elite 25%<br>(Gold guaranteed)</div>
-        <button class="openbtn" onclick="event.stopPropagation();openPack('elite')">Open</button>
+        <span class="openbtn" aria-hidden="true">Open</span>
       </div>
     </div>
     <div class="reveal" id="reveal" aria-live="polite"><div class="hint">Open a pack to reveal a player.</div></div>
