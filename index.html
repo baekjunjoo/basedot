@@ -165,6 +165,17 @@ td{padding:8px 6px;border-bottom:1px solid var(--pline)}tr:last-child td{border:
 .opt{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.3);border-radius:9px;padding:10px 16px;cursor:pointer;font-family:var(--cond);font-weight:600}
 .opt.sel{background:#fff;color:var(--red2)}
 .opt small{display:block;font-size:11px;opacity:.85;font-weight:400;margin-top:2px}
+/* live play-by-play feed */
+.pbp{margin-top:16px;background:#0c1a40;border:2px solid var(--navy);border-radius:10px;color:#fff;box-shadow:0 8px 24px rgba(0,0,0,.4);overflow:hidden}
+.pbp .pbphead{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--navy);font-family:var(--head);font-weight:800;font-style:italic;text-transform:uppercase;letter-spacing:.5px;font-size:15px}
+.pbpbtn{font-family:var(--cond);font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:1px;color:#0c1a40;background:var(--gold);border:2px solid #fff;border-radius:7px;padding:4px 12px;cursor:pointer}
+.pbplog{list-style:none;margin:0;padding:8px 14px;max-height:208px;overflow-y:auto;display:flex;flex-direction:column;gap:6px}
+.pbplog li{font-family:var(--cond);font-size:14px;line-height:1.4;padding:7px 10px;border-radius:7px;background:rgba(255,255,255,.06);border-left:3px solid #4a6bd0}
+.pbplog li .pt{font-family:var(--stat);font-weight:700;color:#9fb6e8;margin-right:7px;font-variant-numeric:tabular-nums}
+.pbplog li.hit{background:rgba(31,157,87,.18);border-left-color:var(--green)}
+.pbplog li.out{background:rgba(224,59,65,.16);border-left-color:var(--red)}
+.pbplog li.run{background:rgba(244,180,26,.18);border-left-color:var(--gold);font-weight:600}
+.pbplog li.inn{background:rgba(255,255,255,.12);border-left-color:#fff;text-transform:uppercase;font-weight:700;letter-spacing:.5px}
 .hintline{font-family:var(--cond);font-size:11px;margin-top:14px;color:#ffd1d4;letter-spacing:.5px}.hintline b{color:var(--gold)}
 .matchup{display:flex;gap:14px;margin-top:14px}
 .mc{flex:1;background:var(--paper);border:2px dashed var(--red);border-radius:8px;padding:13px}
@@ -433,6 +444,13 @@ body{background:linear-gradient(rgba(8,16,38,.5),rgba(8,16,38,.62)),url('assets/
             <div class="opt">Stay<small>Keep T. Vargas</small></div>
           </div>
           <div class="hintline">DOT PAD &nbsp;<b>◀+F1</b> Pitching change · <b>◀▶</b> Move option · <b>F1</b> Confirm</div>
+        </div>
+        <div class="pbp">
+          <div class="pbphead">
+            <span>Play-by-Play</span>
+            <button id="pbpToggle" type="button" class="pbpbtn" aria-pressed="true">Pause</button>
+          </div>
+          <ol id="pbpLog" class="pbplog" role="log" aria-live="polite" aria-label="Live play-by-play commentary"></ol>
         </div>
       </div>
     </div>
@@ -1036,6 +1054,153 @@ go('dashboard');
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',enhance);
   else enhance();
+})();
+</script>
+
+<!-- ===== Live play-by-play feed (in-game commentary) ===== -->
+<script>
+(function(){
+  const CW=["T. Brooks","J. Sullivan","M. Bell","D. Cooper","C. Walker","R. Mitchell","K. Parker","J. Russo","M. Hayes"];
+  const HS=["H. Bryant","M. Cross","A. Doyle","R. Vance","D. Crowe","C. Reed","S. Lake","P. Quinn","J. Ford"];
+  const PITCHER={HS:"T. Vargas",CW:"J. Donovan"};
+  const FIELDS=["left","center","right","left-center","right-center","the gap"];
+  const INFIELD=["short","second","third","first","the mound"];
+  const pick=a=>a[Math.floor(Math.random()*a.length)];
+
+  // state seeded from the static board (Bottom 5, CW 3 - HS 2, 2 outs, 2-1, runners 1 & 3)
+  const S={half:'bot',inning:5,score:{CW:3,HS:2},outs:2,balls:2,strikes:1,
+    runners:{1:true,2:false,3:true}, idx:{CW:2,HS:0}};
+  const batTeam=()=>S.half==='bot'?'CW':'HS';
+  const pitTeam=()=>S.half==='bot'?'HS':'CW';
+  const lineup=t=>t==='CW'?CW:HS;
+  let batter=lineup(batTeam())[S.idx[batTeam()]];
+
+  const log=document.getElementById('pbpLog');
+  const board=document.querySelector('#match .board');
+  const cnt=board?board.querySelectorAll('.cnt > div'):[];
+  const scEl=board?board.querySelector('.sc'):null;
+  const runHdr=document.querySelector('#match .sim .sh .gold');
+  const mcs=document.querySelectorAll('#match .matchup .mc');
+
+  function dots(span,n){ const row=span.querySelector('.bso'); if(!row)return;
+    [...row.children].forEach((i,k)=>i.classList.toggle('on',k<n)); }
+  function runnersText(){ const b=[]; if(S.runners[1])b.push('1'); if(S.runners[2])b.push('2'); if(S.runners[3])b.push('3');
+    return b.length?b.join('·'):'—'; }
+  function runnersDesc(){ const b=[]; if(S.runners[1])b.push('first'); if(S.runners[2])b.push('second'); if(S.runners[3])b.push('third');
+    return b.length?('Runners on '+b.join(', ')):'Bases empty'; }
+  function paint(){
+    if(scEl)scEl.textContent=S.score.CW+' : '+S.score.HS;
+    if(cnt.length>=4){
+      cnt[0].querySelector('b').textContent=(S.half==='bot'?'BOT ':'TOP ')+S.inning;
+      cnt[1].querySelector('b').textContent=S.balls+'-'+S.strikes; dots(cnt[1].querySelector('span'),S.strikes);
+      cnt[2].querySelector('b').textContent=S.outs; dots(cnt[2].querySelector('span'),S.outs);
+      cnt[3].querySelector('b').textContent=runnersText();
+    }
+    if(runHdr)runHdr.textContent = (S.runners[1]||S.runners[2]||S.runners[3])?runnersDesc():'Bases empty';
+    if(mcs.length>=2){
+      mcs[0].querySelector('.role').textContent='Batter · '+batTeam();
+      mcs[0].querySelector('b').textContent=batter;
+      mcs[1].querySelector('.role').textContent='Pitcher · '+pitTeam();
+      mcs[1].querySelector('b').textContent=PITCHER[pitTeam()];
+    }
+  }
+  function add(text,cls){
+    if(!log)return;
+    const li=document.createElement('li'); if(cls)li.className=cls;
+    const tag=(S.half==='bot'?'B':'T')+S.inning;
+    li.innerHTML='<span class="pt">'+tag+'</span>'+text;
+    log.appendChild(li);
+    while(log.children.length>40)log.removeChild(log.firstChild);
+    log.scrollTop=log.scrollHeight;
+    // speak via the game's own voice when enabled (screen readers get it from aria-live)
+    if(window.BaseDot&&window.BaseDot.speak)window.BaseDot.speak(text.replace(/<[^>]+>/g,''),false);
+  }
+  function nextBatter(){ const t=batTeam(); S.idx[t]=(S.idx[t]+1)%lineup(t).length; batter=lineup(t)[S.idx[t]]; }
+  function score(n,who){ S.score[who]+=n; }
+  function walkAdvance(){ // only forced runners move
+    let runs=0;
+    if(S.runners[1]){ if(S.runners[2]){ if(S.runners[3]){ runs++; } S.runners[3]=true; } S.runners[2]=true; }
+    S.runners[1]=true;
+    if(runs)score(runs,batTeam());
+    return runs;
+  }
+
+  function advance(bases, isHit){ // move runners by `bases`, batter reaches `bases`
+    let runs=0;
+    for(let b=3;b>=1;b--){ if(S.runners[b]){ const nb=b+bases; S.runners[b]=false; if(nb>=4)runs++; else S.runners[nb]=true; } }
+    if(bases>=4)runs++; else S.runners[bases]=true; // batter
+    if(runs){ score(runs,batTeam()); }
+    return runs;
+  }
+  function endHalf(){
+    add('End of the half-inning.','inn');
+    S.runners={1:false,2:false,3:false}; S.outs=0; S.balls=0; S.strikes=0;
+    if(S.half==='bot'){S.half='top';S.inning++;} else {S.half='bot';}
+    nextBatterReset();
+    add((S.half==='bot'?'Bottom':'Top')+' of the '+ordinal(S.inning)+'. '+batTeam()+' batting, '+PITCHER[pitTeam()]+' on the mound.','inn');
+  }
+  function nextBatterReset(){ const t=batTeam(); batter=lineup(t)[S.idx[t]]; }
+  function ordinal(n){ const s=["th","st","nd","rd"],v=n%100; return n+(s[(v-20)%10]||s[v]||s[0]); }
+  function checkOut(){ S.outs++; if(S.outs>=3){ paint(); endHalf(); return true;} return false; }
+
+  function tick(){
+    const r=Math.random();
+    if(r<0.30){ // ball
+      S.balls++;
+      if(S.balls>=4){ add('Ball four — <b>'+batter+'</b> draws a walk.',''); const runs=walkAdvance();
+        if(runs)add(batter+' walks in a run! '+S.score.CW+'–'+S.score.HS+'.','run');
+        S.balls=0;S.strikes=0;nextBatter(); }
+      else add('Ball '+S.balls+'.','');
+    } else if(r<0.58){ // strike
+      const sw=Math.random()<0.5;
+      S.strikes++;
+      if(S.strikes>=3){ add('Strike three! <b>'+batter+'</b> '+(sw?'goes down swinging':'caught looking')+'.','out');
+        S.balls=0;S.strikes=0;nextBatter(); checkOut(); }
+      else add('Strike '+S.strikes+(sw?' swinging.':' looking.'),'');
+    } else if(r<0.70){ // foul
+      if(S.strikes<2)S.strikes++;
+      add('<b>'+batter+'</b> fouls it off. Count '+S.balls+'-'+S.strikes+'.','');
+    } else { // ball in play
+      const p=Math.random();
+      if(p<0.60){ // out in play
+        const fly=Math.random()<0.5;
+        add('<b>'+batter+'</b> '+(fly?'flies out to '+pick(FIELDS):'grounds out to '+pick(INFIELD))+'.','out');
+        S.balls=0;S.strikes=0;nextBatter(); checkOut();
+      } else if(p<0.82){ // single
+        add('Base hit! <b>'+batter+'</b> singles to '+pick(FIELDS)+'.','hit');
+        const runs=advance(1,true); if(runs)add(runs+' run'+(runs>1?'s':'')+' score'+(runs>1?'':'s')+'! '+S.score.CW+'–'+S.score.HS+'.','run');
+        S.balls=0;S.strikes=0;nextBatter();
+      } else if(p<0.93){ // double
+        add('Into the gap! <b>'+batter+'</b> doubles to '+pick(FIELDS)+'.','hit');
+        const runs=advance(2,true); if(runs)add(runs+' run'+(runs>1?'s':'')+' come'+(runs>1?'':'s')+' around! '+S.score.CW+'–'+S.score.HS+'.','run');
+        S.balls=0;S.strikes=0;nextBatter();
+      } else { // home run
+        add('Gone! <b>'+batter+'</b> launches a home run to '+pick(FIELDS)+'!','hit');
+        const runs=advance(4,true); add(runs+'-run shot! '+S.score.CW+'–'+S.score.HS+'.','run');
+        S.balls=0;S.strikes=0;nextBatter();
+      }
+    }
+    paint();
+  }
+
+  // run loop only while Match is active and not paused
+  let paused=false, seeded=false;
+  const btn=document.getElementById('pbpToggle');
+  function setBtn(){ if(!btn)return; btn.textContent=paused?'Resume':'Pause'; btn.setAttribute('aria-pressed',paused?'true':'false'); btn.setAttribute('aria-label',(paused?'Resume':'Pause')+' live play-by-play'); }
+  if(btn){ setBtn(); btn.addEventListener('click',()=>{ paused=!paused; setBtn(); }); }
+
+  function seed(){ if(seeded||!log)return; seeded=true;
+    add('Bottom of the 5th. Capital Wings batting, T. Vargas on the mound.','inn');
+    add('Runners on first and third, two outs. <b>M. Bell</b> at the plate.','');
+    paint();
+  }
+  setInterval(()=>{
+    const active=document.getElementById('match') && document.getElementById('match').classList.contains('active');
+    if(!active)return;
+    if(!seeded)seed();
+    if(paused)return;
+    tick();
+  },3000);
 })();
 </script>
 </body>
